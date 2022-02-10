@@ -27,7 +27,7 @@ function init() {
     // Create the empty model board
     initBoardModel()
     // set starting viruses
-    virusCount = 15;
+    virusCount = 4;
     initViruses()
     // * dont reset the score
 }

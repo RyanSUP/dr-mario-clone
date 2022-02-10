@@ -46,12 +46,17 @@ section.board-container {
 
 .Y {
     background-color: rgb(255, 255, 121);
+    border: 12px solid rgb(152, 152, 63);
 }
 
 .R {
     background-color: rgb(255, 114, 114);
+    border: 12px solid rgb(128, 54, 54);
+
 }
 
 .B {
     background-color: rgb(116, 116, 255);
+    border: 12px solid rgb(50, 50, 108);
+
 }
