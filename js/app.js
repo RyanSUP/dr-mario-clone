@@ -1,20 +1,34 @@
+/**
+ * Definitions:
+ * Node - an object that takes a single space on the board. This could be a pillNode or a virus.
+ * Pill - 2 pillNodes that are linked to each other
+ */
+
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
 const TOTAL_ROWS = 16
 const TOTAL_COLS = 8
+// These colors will determine color on the board when rendering, and also be used as symbols in the board data model
+const PILL_COLORS = ['r', 'y', 'b']
+const VIRUS_COLORS = ['R', 'Y', 'B']
 const sqDivs = []
+const boardModel = [];
 /* -------------------------------  CACHED REFERENCES  -------------------------------- */
 const boardContainer = document.querySelector('.board-container')
 /* -------------------------------  Variables  -------------------------------- */
-let boardModel;
+let virusCount;
 /* -------------------------------  Main  -------------------------------- */
 init()
-/* -------------------------------  Functions  -------------------------------- */
+render()
+
+/* -------------------------------  Initializing  -------------------------------- */
 function init() {
     // Create the HTML (View) board
-    initBoardDivs()
-    // Create the model board
-    boardModel = getInitialBoardModel()
+    initSqDivs()
+    // Create the empty model board
+    initBoardModel()
     // set starting viruses
+    virusCount = 15;
+    initViruses()
     // * dont reset the score
 }
 
@@ -22,7 +36,7 @@ function init() {
 // Pushes div elements into 2D sqDivs array to be used for rendering.
 // The array is 2D because the data model is and this will make it easier to translate
 // the model to the view
-function initBoardDivs() {
+function initSqDivs() {
     for(let row = 0; row < TOTAL_ROWS; row++) {
         const divsInRow = []
         for(let col = 0; col < TOTAL_COLS; col++) {
@@ -34,18 +48,88 @@ function initBoardDivs() {
         }
         sqDivs.push(divsInRow) 
     }
-
 }
 
-function getInitialBoardModel() {
-    let model = []
+function initBoardModel() {
     for(let row = 0; row < TOTAL_ROWS; row++) {
         const columnsInRow = []
         for(let col = 0; col < TOTAL_COLS; col++) {
             columnsInRow.push(null)
         }
-        model.push(columnsInRow) 
+        boardModel.push(columnsInRow) 
     }
-    return model
 }
 
+function initViruses() {
+    for(let i = 0; i < virusCount; i++) {
+        let v = getRandomizedVirusNode()
+        boardModel[v.row][v.col] = v
+    }
+}
+
+/* -------------------------------  Render  -------------------------------- */
+function render() {
+    renderNodes()
+}
+
+function renderNodes() {
+    for(let row = 0; row < TOTAL_ROWS; row++) {
+        for(let col = 0; col < TOTAL_COLS; col++) {
+            if(boardModel[row][col] !== null) {
+                let node = boardModel[row][col]
+                // The reason I can't simply  put this next line in the updateBoardModel() is because
+                // that wouldn't account for 
+                sqDivs[node.row][node.col].classList.add(node.color)
+            }
+        }
+    }
+}
+
+/* -------------------------------  Node / Pill / Virus Functions  -------------------------------- */
+
+function getPlayerPill() {
+    let randomIdxA = Math.floor(Math.random() * PILL_COLORS.length)
+    let randomIdxB = Math.floor(Math.random() * PILL_COLORS.length)
+
+    let nodeA = {
+        color: PILL_COLORS[randomIdxA],
+        row: 0,
+        col: 3,
+        sibling: null
+    }
+
+    let nodeB = {
+        color: PILL_COLORS[randomIdxB],
+        row: 0,
+        col: 4,
+        sibling: null
+    }
+
+    // Link them
+    nodeA.sibling = nodeB
+    nodeB.sibling = nodeA
+}
+
+// TODO: Set handicap
+// Setting the handicap ensures viruses will never be generated above that row.
+// Just keep in min 0 is at the top and 16 is at the bottom
+function getRandomizedVirusNode(handicap) {
+    // get random color. 
+    // PILL_COLORS and VIRUS_COLORS will always be the same length, so it doesn't matter which I choose here.
+    let randomIdx = Math.floor(Math.random() * PILL_COLORS.length)
+    let randomRow = Math.floor(Math.random() * TOTAL_ROWS)
+    let randomCol = Math.floor(Math.random() * TOTAL_COLS)
+
+    return {
+        color: VIRUS_COLORS[randomIdx],
+        row: randomRow,
+        col: randomCol,
+        sibling: null // Virus will never have a sibling, but I'll keep this property for now.
+    }
+}
+
+// ! The board model can use this function to check if a 
+function getNodeAt(row, col) {
+
+}
+/* -------------------------------  Board  -------------------------------- */
