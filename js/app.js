@@ -62,17 +62,17 @@ function initBoardModel() {
 
 function initViruses() {
     for(let i = 0; i < virusCount; i++) {
-        let v = getRandomizedVirusNode()
+        let v = getRandomizedVirusNode(8)
         boardModel[v.row][v.col] = v
     }
 }
 
 /* -------------------------------  Render  -------------------------------- */
 function render() {
-    renderNodes()
+    renderBoard()
 }
 
-function renderNodes() {
+function renderBoard() {
     for(let row = 0; row < TOTAL_ROWS; row++) {
         for(let col = 0; col < TOTAL_COLS; col++) {
             if(boardModel[row][col] !== null) {
@@ -110,14 +110,14 @@ function getPlayerPill() {
     nodeB.sibling = nodeA
 }
 
-// TODO: Set handicap
 // Setting the handicap ensures viruses will never be generated above that row.
 // Just keep in min 0 is at the top and 16 is at the bottom
 function getRandomizedVirusNode(handicap) {
     // get random color. 
     // PILL_COLORS and VIRUS_COLORS will always be the same length, so it doesn't matter which I choose here.
     let randomIdx = Math.floor(Math.random() * PILL_COLORS.length)
-    let randomRow = Math.floor(Math.random() * TOTAL_ROWS)
+    let randomRow = Math.floor(Math.random() * TOTAL_ROWS + handicap)
+    randomRow = clampNum(randomRow, handicap, 15)
     let randomCol = Math.floor(Math.random() * TOTAL_COLS)
 
     return {
@@ -128,8 +128,16 @@ function getRandomizedVirusNode(handicap) {
     }
 }
 
-// ! The board model can use this function to check if a 
-function getNodeAt(row, col) {
-
-}
 /* -------------------------------  Board  -------------------------------- */
+
+/* -------------------------------  Helpers  -------------------------------- */
+
+function clampNum(num, min, max) {
+    if(num > max) {
+        return max
+    } else if (num < min) {
+        return min
+    } else {
+        return num
+    }
+}
