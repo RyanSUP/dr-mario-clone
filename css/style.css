@@ -1,6 +1,6 @@
 
 
-section.board {
+section.board-container {
     background-color: rgb(59, 42, 94);
     margin: 0 auto;
     display: grid;
