@@ -16,16 +16,47 @@ const boardModel = [];
 const boardContainer = document.querySelector('.board-container')
 /* -------------------------------  Variables  -------------------------------- */
 let virusCount;
-/* -------------------------------  Main  -------------------------------- */
-init()
-render()
+let playerPill;
 
+/* -------------------------------  Player Pill  -------------------------------- */
+class PlayerPill {
+    constructor() {
+        this.pillNodeA = this.createPillNode(3)
+        this.pillNodeB = this.createPillNode(4)
+        this.couplePillNodes()
+    }
+
+    createPillNode(startingColumn) {
+        let randomIdx = Math.floor(Math.random() * PILL_COLORS.length)
+        return {
+            color: PILL_COLORS[randomIdx],
+            row: 0,
+            col: startingColumn,
+            sibling: null
+        }
+    }
+
+    couplePillNodes() {
+        this.pillNodeA.sibling = this.pillNodeB
+        this.pillNodeB.sibling = this.pillNodeA
+    }
+
+    update() {
+        updateNodePositionOnBoardModel(this.pillNodeA)
+        updateNodePositionOnBoardModel(this.pillNodeB)
+    }
+
+
+}
 /* -------------------------------  Initializing  -------------------------------- */
 function init() {
     // Create the HTML (View) board
     initSqDivs()
+    // Create player
+    playerPill = new PlayerPill()
     // Create the empty model board
     initBoardModel()
+    playerPill.update()
     // set starting viruses
     virusCount = 4;
     initViruses()
@@ -87,27 +118,11 @@ function renderBoard() {
 
 /* -------------------------------  Node / Pill / Virus Functions  -------------------------------- */
 
-function getPlayerPill() {
-    let randomIdxA = Math.floor(Math.random() * PILL_COLORS.length)
-    let randomIdxB = Math.floor(Math.random() * PILL_COLORS.length)
-
-    let nodeA = {
-        color: PILL_COLORS[randomIdxA],
-        row: 0,
-        col: 3,
-        sibling: null
-    }
-
-    let nodeB = {
-        color: PILL_COLORS[randomIdxB],
-        row: 0,
-        col: 4,
-        sibling: null
-    }
-
-    // Link them
-    nodeA.sibling = nodeB
-    nodeB.sibling = nodeA
+function decouplePillNode(node) {
+    // Remove the node from its sibling
+    node.sibling.sibling = null
+    // Then remove the sibling node
+    node.sibling = null
 }
 
 // Setting the handicap ensures viruses will never be generated above that row.
@@ -129,7 +144,13 @@ function getRandomizedVirusNode(handicap) {
 }
 
 /* -------------------------------  Board  -------------------------------- */
+function updateNodePositionOnBoardModel(node) {
+    let col = node.col
+    let row = node.row
+    
+    boardModel[row][col] = node
 
+}
 /* -------------------------------  Helpers  -------------------------------- */
 
 function clampNum(num, min, max) {
@@ -141,3 +162,8 @@ function clampNum(num, min, max) {
         return num
     }
 }
+
+
+/* -------------------------------  Main  -------------------------------- */
+init()
+render()

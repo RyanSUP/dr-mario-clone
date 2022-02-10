@@ -60,3 +60,15 @@ section.board-container {
     border: 12px solid rgb(50, 50, 108);
 
 }
+
+.y {
+    background-color: rgb(255, 255, 121);
+}
+
+.r {
+    background-color: rgb(255, 114, 114);
+}
+
+.b {
+    background-color: rgb(116, 116, 255);
+}
