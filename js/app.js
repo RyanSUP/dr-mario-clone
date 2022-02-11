@@ -32,7 +32,9 @@ class PlayerPill {
             color: PILL_COLORS[randomIdx],
             row: 0,
             col: startingColumn,
-            sibling: null
+            sibling: null,
+            prevRow: 0,
+            prevCol: startingColumn,
         }
     }
 
@@ -41,13 +43,67 @@ class PlayerPill {
         this.pillNodeB.sibling = this.pillNodeA
     }
 
-    update() {
-        updateNodePositionOnBoardModel(this.pillNodeA)
-        updateNodePositionOnBoardModel(this.pillNodeB)
+    addThisToBoardModel() {
+        addNodeToBoardModel(this.pillNodeA)
+        addNodeToBoardModel(this.pillNodeB)
     }
 
+    move(rowDirection, colDirection) {
+        this.removeThisFromBoardModel()
 
+        this.pillNodeA.row += rowDirection
+        this.pillNodeB.row += rowDirection
+        this.pillNodeA.col += colDirection
+        this.pillNodeB.col += colDirection
+        this.addThisToBoardModel()
+
+    }
+    removeThisFromBoardModel() {
+        removeNodeFromBoardModel(this.pillNodeA)
+        removeNodeFromBoardModel(this.pillNodeB)
+    }
+    moveDown() {
+        this.removeThisFromBoardModel()
+        this.pillNodeA.row += 1
+        this.pillNodeB.row += 1
+        this.addThisToBoardModel
+        this.addThisToBoardModel()
+    }
+
+    /**
+     * if it moves down, the 2 columns above go null.
+     * if it moves left, column to the right of B is null
+     * if it moces right, column to the left of a is null
+     */
 }
+
+/* -------------------------------  Event Listeners  -------------------------------- */
+document.addEventListener('keydown', handleKeyPress);
+
+function handleKeyPress(evt) {
+    if(evt.code === 'ArrowLeft') {
+        console.log('LEFT')
+        playerPill.move(0, -1)
+    } else if(evt.code === 'ArrowRight') {
+        console.log('RIGHT')
+        playerPill.move(0, 1)
+    } else if(evt.code === 'ArrowDown') {
+        console.log('DOWN')
+        playerPill.move(1, 0)
+    } else if(evt.code === 'KeyZ') {
+        console.log('Z')
+    } else if(evt.code === 'KeyX') {
+        console.log('X')
+    }
+    render()
+}
+/**
+ArrowRight
+app.js:56  ArrowLeft
+app.js:56  ArrowDown
+app.js:56  KeyZ
+app.js:56  KeyX
+ */
 /* -------------------------------  Initializing  -------------------------------- */
 function init() {
     // Create the HTML (View) board
@@ -56,7 +112,7 @@ function init() {
     playerPill = new PlayerPill()
     // Create the empty model board
     initBoardModel()
-    playerPill.update()
+    playerPill.addThisToBoardModel()
     // set starting viruses
     virusCount = 4;
     initViruses()
@@ -108,9 +164,9 @@ function renderBoard() {
         for(let col = 0; col < TOTAL_COLS; col++) {
             if(boardModel[row][col] !== null) {
                 let node = boardModel[row][col]
-                // The reason I can't simply  put this next line in the updateBoardModel() is because
-                // that wouldn't account for 
-                sqDivs[node.row][node.col].classList.add(node.color)
+                sqDivs[row][col].classList.add(node.color)
+            } else {
+                sqDivs[row][col].className = 'sq'
             }
         }
     }
@@ -144,12 +200,11 @@ function getRandomizedVirusNode(handicap) {
 }
 
 /* -------------------------------  Board  -------------------------------- */
-function updateNodePositionOnBoardModel(node) {
-    let col = node.col
-    let row = node.row
-    
-    boardModel[row][col] = node
-
+function addNodeToBoardModel(node) {
+    boardModel[node.row][node.col] = node
+}
+function removeNodeFromBoardModel(node) {
+    boardModel[node.row][node.col] = null
 }
 /* -------------------------------  Helpers  -------------------------------- */
 
