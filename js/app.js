@@ -19,6 +19,8 @@ let virusCount;
 let playerPill;
 /* ------------------------------- 🎮 Player Pill 💊 -------------------------------- */
 class PlayerPill {
+    // TODO: Refactor pillNodes into an array?
+    // This would be helpful because there are a lot of operations done to nodeA and nodeB that are taking up 2 lines of code. Maybe if they're in an array I can make a higher order function to do the operation to both nodes.
     constructor() {
         this.pillNodeA = this.createPillNode({row:0, col:3})
         this.pillNodeB = this.createPillNode({row:0, col:4})
@@ -37,15 +39,37 @@ class PlayerPill {
         }
     }
 
-    legalMoveCheck(nextRow, nextCol) {
+    isLegalMove(positionOffset) {
+        let nodes = [this.pillNodeA, this.pillNodeB]
+        for(const n of nodes) {
+            let newPosition = {
+                row: n.position.row + positionOffset.row,
+                col: n.position.col + positionOffset.col,
+            }
+            if(!this.isInBounds(newPosition)) {
+                return false
+            }
+        }
+        return true
         // Illegal moves:
         // going over left / right edge
         // overlapping an existing node
 
     }
+    // {row: 0, col: 1} <- sample data
+    // This will only check the left and right side since being on the last row will trigger the end of the pills journey.
+    isInBounds(nextPosition) {
+        return (nextPosition.col === TOTAL_COLS || nextPosition.col < 0) ? false : true
+    }
+
+    isDoneMoving() {
+
+    }
 
     lastRowCheck() {
-        console.log(this, "On the last row!")
+        if (nextPosition.row === TOTAL_ROWS) {
+            console.log(this, "On the last row!")
+        }
     }
 
     couplePillNodes() {
@@ -65,13 +89,19 @@ class PlayerPill {
 
     // position offset is an object {row: y, col: x}
     move(positionOffset) {
-        // Remove this pill from the board
-        this.removeThisFromBoardModel()
-        // Change the pill coords
-        this.pillNodeA.position_ = positionOffset
-        this.pillNodeB.position_ = positionOffset
-        // Add the new coords to the board
-        this.addThisToBoardModel()
+        // Check if legal move
+        if(this.isLegalMove(positionOffset)) {
+
+            // Remove this pill from the board
+            this.removeThisFromBoardModel()
+            // Change the pill coords
+            this.pillNodeA.position_ = positionOffset
+            this.pillNodeB.position_ = positionOffset
+            // Add the new coords to the board
+            this.addThisToBoardModel()
+        } else {
+            return
+        }
 
     }
 
