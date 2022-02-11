@@ -30,8 +30,7 @@ class PlayerPill {
             color: PILL_COLORS[randomIdx],
             sibling: null,
             position: startPosition, //{row:0, col:3} 
-            set pos (offset) {
-                console.log(offset)
+            set position_ (offset) {
                 this.position.row += offset.row
                 this.position.col += offset.col
             }
@@ -69,8 +68,8 @@ class PlayerPill {
         // Remove this pill from the board
         this.removeThisFromBoardModel()
         // Change the pill coords
-        this.pillNodeA.pos = positionOffset
-        this.pillNodeB.pos = positionOffset
+        this.pillNodeA.position_ = positionOffset
+        this.pillNodeB.position_ = positionOffset
         // Add the new coords to the board
         this.addThisToBoardModel()
 
@@ -169,6 +168,8 @@ function renderBoard() {
             }
         }
     }
+    // This is for testing. print all the data to the log
+    logBoard()
 }
 
 /* ------------------------------- 🦠 Node / Pill / Virus Functions 🧫 -------------------------------- */
@@ -202,7 +203,6 @@ function getRandomizedVirusNode(handicap) {
 /* -------------------------------  Helpers  -------------------------------- */
 function addNodeToBoardModel(node) {
     let pos = node.position
-    console.log(node)
     boardModel[pos.row][pos.col] = node
 }
 function removeNodeFromBoardModel(node) {
@@ -220,6 +220,17 @@ function clampNum(num, min, max) {
     }
 }
 
+function logBoard() {
+    console.log('=====================')
+    boardModel.forEach(r => {
+        let str = ''
+        r.forEach(c => {
+            str += (c === null) ? '- ' : c.color + ' '
+        })
+        console.log(str)
+    })
+    console.log('=====================')
+}
 
 /* -------------------------------  Main  -------------------------------- */
 init()
