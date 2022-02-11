@@ -42,22 +42,33 @@ class PlayerPill {
             }
         }
     }
+
     isLegalMove(positionOffset) {
         for(const n of this.nodes) {
-            let newPosition = {
+            let nextPosition = {
                 row: n.position.row + positionOffset.row,
                 col: n.position.col + positionOffset.col,
             }
-            if(!this.isInBounds(newPosition)) {
+            if(!this.isInBounds(nextPosition)) {
                 return false
             }
+            if(this.isColliding(n, nextPosition)) {
+                return false
+            } else {
+                // end of move.
+                // trigger check for connections
+                // make new player object
+            }
         }
+        // All checks passed
         return true
-        // Illegal moves:
-        // going over left / right edge
-        // overlapping an existing node
-
     }
+
+    isColliding(node, nextPosition) {
+        let npNode = getNodeFromBoardModelAt(nextPosition)
+        return (npNode === null || npNode === node.sibling) ? false : true
+    }
+
     // {row: 0, col: 1} <- sample data
     // This will only check the left and right side since being on the last row will trigger the end of the pills journey.
     isInBounds(nextPosition) {
@@ -243,6 +254,10 @@ function clampNum(num, min, max) {
     } else {
         return num
     }
+}
+
+function getNodeFromBoardModelAt(positionObj) {
+    return boardModel[positionObj.row][positionObj.col]
 }
 
 function logBoard() {
