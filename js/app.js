@@ -19,29 +19,31 @@ let virusCount;
 let playerPill;
 /* ------------------------------- 🎮 Player Pill 💊 -------------------------------- */
 class PlayerPill {
-    // TODO: Refactor pillNodes into an array?
-    // This would be helpful because there are a lot of operations done to nodeA and nodeB that are taking up 2 lines of code. Maybe if they're in an array I can make a higher order function to do the operation to both nodes.
+
     constructor() {
-        this.pillNodeA = this.createPillNode({row:0, col:3})
-        this.pillNodeB = this.createPillNode({row:0, col:4})
-        this.couplePillNodes()
+        // Pills always start in the top center
+        let nodeA = this.createPillNode({row:0, col:3})
+        let nodeB = this.createPillNode({row:0, col:4})
+        // Pills always start connected to their sibling
+        nodeA.sibling = nodeB
+        nodeB.sibling = nodeA
+
+        this.nodes = [nodeA, nodeB]
     }
     createPillNode(startPosition) {
         let randomIdx = Math.floor(Math.random() * PILL_COLORS.length)
         return {
             color: PILL_COLORS[randomIdx],
             sibling: null,
-            position: startPosition, //{row:0, col:3} 
-            set position_ (offset) {
+            position: startPosition, 
+            set newPosition (offset) {
                 this.position.row += offset.row
                 this.position.col += offset.col
             }
         }
     }
-
     isLegalMove(positionOffset) {
-        let nodes = [this.pillNodeA, this.pillNodeB]
-        for(const n of nodes) {
+        for(const n of this.nodes) {
             let newPosition = {
                 row: n.position.row + positionOffset.row,
                 col: n.position.col + positionOffset.col,
@@ -72,19 +74,12 @@ class PlayerPill {
         }
     }
 
-    couplePillNodes() {
-        this.pillNodeA.sibling = this.pillNodeB
-        this.pillNodeB.sibling = this.pillNodeA
-    }
+    updatePlayerPillOnBoardModel() {
+        this.nodes.forEach(n => addNodeToBoardModel(n))
 
-    addThisToBoardModel() {
-        addNodeToBoardModel(this.pillNodeA)
-        addNodeToBoardModel(this.pillNodeB)
     }
-    
-    removeThisFromBoardModel() {
-        removeNodeFromBoardModel(this.pillNodeA)
-        removeNodeFromBoardModel(this.pillNodeB)
+    removePlayerPillFromBoardModel() {
+        this.nodes.forEach(n => removeNodeFromBoardModel(n))
     }
 
     // position offset is an object {row: y, col: x}
@@ -93,12 +88,11 @@ class PlayerPill {
         if(this.isLegalMove(positionOffset)) {
 
             // Remove this pill from the board
-            this.removeThisFromBoardModel()
+            this.removePlayerPillFromBoardModel()
             // Change the pill coords
-            this.pillNodeA.position_ = positionOffset
-            this.pillNodeB.position_ = positionOffset
+            this.nodes.forEach(n => n.newPosition = positionOffset)
             // Add the new coords to the board
-            this.addThisToBoardModel()
+            this.updatePlayerPillOnBoardModel()
         } else {
             return
         }
@@ -127,6 +121,7 @@ function handleKeyPress(evt) {
     render()
 }
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
+// ! After I implement the game loop player stuff will be in its own function that handles spawning a new pill
 function init() {
     // Create the HTML (View) board
     initSqDivs()
@@ -134,7 +129,7 @@ function init() {
     playerPill = new PlayerPill()
     // Create the empty model board
     initBoardModel()
-    playerPill.addThisToBoardModel()
+    playerPill.updatePlayerPillOnBoardModel()
     // set starting viruses
     virusCount = 4;
     initViruses()
