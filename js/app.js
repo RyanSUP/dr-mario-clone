@@ -4,6 +4,9 @@
  * Pill - 2 pillNodes that are linked to each other
  */
 
+// ! WHen moving horizontally, the colors get shifted around.
+// ! See notebook for solution
+
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
 const TOTAL_ROWS = 16
 const TOTAL_COLS = 8
@@ -162,12 +165,11 @@ function render() {
 function renderBoard() {
     for(let row = 0; row < TOTAL_ROWS; row++) {
         for(let col = 0; col < TOTAL_COLS; col++) {
+            sqDivs[row][col].className = 'sq'
             if(boardModel[row][col] !== null) {
                 let node = boardModel[row][col]
                 sqDivs[row][col].classList.add(node.color)
-            } else {
-                sqDivs[row][col].className = 'sq'
-            }
+            }git b
         }
     }
 }
@@ -183,6 +185,7 @@ function decouplePillNode(node) {
 
 // Setting the handicap ensures viruses will never be generated above that row.
 // Just keep in min 0 is at the top and 16 is at the bottom
+// ! I need to make it so they don't spawn on a space that is already taken!
 function getRandomizedVirusNode(handicap) {
     // get random color. 
     // PILL_COLORS and VIRUS_COLORS will always be the same length, so it doesn't matter which I choose here.
