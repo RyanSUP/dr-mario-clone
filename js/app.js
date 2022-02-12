@@ -53,20 +53,6 @@ class PlayerPill {
         }
     }
 
-    isLegalMove(n, position) {
-        let nextPosition = this.addPositions(n.position, position)
-        // Prevent player from going off the board
-        if(!this.isInBounds(nextPosition)) {
-            return false
-        }
-        // Prevent player from moving into another node
-        if(this.isColliding(n, nextPosition)) {
-            return false
-        }
-        // All checks passed
-        return true
-    }
-
     isColliding(node, position) {
         let npNode = getNodeFromBoardModelAt(position)
         return (npNode === null || npNode === node.sibling) ? false : true
@@ -97,18 +83,25 @@ class PlayerPill {
     removePlayerPillFromBoardModel() { this.nodes.forEach(n => removeNodeFromBoardModel(n)) }
 
     // position offset is an object {row: y, col: x}
-    move(positionOffset) {
+    move(position) {
 
         // Do nothing if the move is not legal
         for(let n of this.nodes) {
-            if(!this.isLegalMove(n, positionOffset)) {
-                return
+            let nextPosition = this.addPositions(n.position, position)
+            // Prevent player from going off the board
+            if(!this.isInBounds(nextPosition)) {
+                return false
+            }
+            // Prevent player from moving into another node
+            if(this.isColliding(n, nextPosition)) {
+                return false
             }
         }
+
         // Remove this pill from the board
         this.removePlayerPillFromBoardModel()
         // Change the pill coords
-        this.nodes.forEach(n => n.position = this.addPositions(n.position, positionOffset))
+        this.nodes.forEach(n => n.position = this.addPositions(n.position, position))
         // Add the new coords to the board
         this.updatePlayerPillOnBoardModel()
     }
@@ -116,12 +109,18 @@ class PlayerPill {
     updateOrientation() { this.orientation *= -1 }
 
     // TODO: Handle rotation when against a wall or wall of nodes.
+  
     rotateClockwise() {
-        // If horizontal, check above the hinge node, if it vertical, check to the right of the key node
+        // If horizontal, check above the hinge node, if it vertical, check to the right of the hinge node
         let rotationOffset = (this.orientation === -1) ?  {row: -1, col: 0} : {row: 0, col: 1}
+        let nextPosition = this.addPositions(this.nodes[0].position, rotationOffset)
 
-        if(!this.isLegalMove(this.nodes[0], rotationOffset)) {
-            return
+        if(!this.isInBounds(nextPosition)) {
+            return false
+        }
+        // Prevent player from moving into another node
+        if(this.isColliding(this.nodes[0], nextPosition)) {
+            return false
         }
 
         // Take pill off the board
@@ -130,7 +129,7 @@ class PlayerPill {
         // rotate the pill
         if(this.orientation === -1){
             this.nodes[1].position = this.nodes[0].position
-            this.nodes[0].position = this.addPositions(this.nodes[0].position, rotationOffset)
+            this.nodes[0].position = nextPosition
             // update the hinge node
             this.nodes.reverse()
         } else {
@@ -143,22 +142,69 @@ class PlayerPill {
         this.updateOrientation()   
     }
 
-    // [
-    //     null, null
-    //     {a}, {b} 
-    // ]
-    // [
-    //     {a}, null
-    //     {b}, null
-    // ]
+  /**
+     * If the pill is against something to the left, all rotations are normal
+     * If the pill os against something to the right, the box shifts to the left 1 and then rotates normally
+     * 
+     * Psuedo
+     * If the pill is vertical
+     *   If (there is a node to the right of the hinge, or the pill is on the last legal column)
+     *   and if there is an empty space to the left of the hinge
+     *   Then shift hinge to the left 1 space and carry out the vertical to horizontal rotation
+     */
+    verticalBlockedClockwiseRotate() {
+        if(this.orientation === 1) {
+            let positionRightOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: 1})
+            let positionRightOfSibling = this.addPositions(this.nodes[1].position, {row: 0, col: 1})
 
+            let positionLeftOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: -1})
+
+            if(getNodeFromBoardModelAt(positionRightOfHinge) !== null &&
+               getNodeFromBoardModelAt(positionRightOfSibling) !== null &&
+                getNodeFromBoardModelAt(positionLeftOfHinge) === null
+            ) {
+                this.removePlayerPillFromBoardModel()
+                this.nodes[1].position = this.nodes[0].position
+                this.nodes[0].position = positionLeftOfHinge
+                this.updatePlayerPillOnBoardModel()
+                this.updateOrientation()   
+                render()
+            }
+        }
+    }
+
+    verticalBlockedCounterClockwiseRotate() {
+        if(this.orientation === 1) {
+            let positionRightOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: 1})
+            let positionRightOfSibling = this.addPositions(this.nodes[1].position, {row: 0, col: 1})
+
+            let positionLeftOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: -1})
+
+            if(getNodeFromBoardModelAt(positionRightOfHinge) !== null &&
+               getNodeFromBoardModelAt(positionRightOfSibling) !== null &&
+                getNodeFromBoardModelAt(positionLeftOfHinge) === null
+            ) {
+                this.removePlayerPillFromBoardModel()
+                this.nodes[1].position = positionLeftOfHinge
+                this.nodes[0].position = this.nodes[0].position
+                this.nodes.reverse()
+                this.updatePlayerPillOnBoardModel()
+                this.updateOrientation()   
+                render()
+            }
+        }
+    }
 
     rotateCounterClockwise() {
         // If horizontal, check above the hinge node, if it vertical, check to the right of the key node
         let rotationOffset = (this.orientation === 1) ? {row: 0, col: 1} : {row: -1, col: 0}
 
-        if(!this.isLegalMove(this.nodes[0], rotationOffset)) {
-            return
+        if(!this.isInBounds(this.addPositions(this.nodes[0].position, rotationOffset))) {
+            return false
+        }
+        // Prevent player from moving into another node
+        if(this.isColliding(this.nodes[0], this.addPositions(this.nodes[0].position, rotationOffset))) {
+            return false
         }
 
         // Take pill off the board
@@ -219,6 +265,13 @@ function init() {
     virusCount = 4;
     initViruses()
     // * dont reset the score
+
+    // Test moving the pill on its own
+    // If move returns false then the pill is down moving.
+    // let test = setInterval(() => {
+    //     playerPill.move(MOVE_DOWN)
+    //     render()
+    // }, 400)
 }
 
 // Creates div elements and appends them to boardContainer
@@ -279,7 +332,7 @@ function renderBoard() {
         }
     }
     // This is for testing. print all the data to the log
-    logBoard()
+    // logBoard()
 }
 
 /* ------------------------------- 🦠 Node / Pill / Virus Functions 🧫 -------------------------------- */
