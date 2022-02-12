@@ -2,6 +2,7 @@
  * Definitions:
  * Node - an object that takes a single space on the board. This could be a pillNode or a virus.
  * Pill - 2 pillNodes that are linked to each other
+ * hinge Node - Image a 2x2 box around a 1x2 pill, the hinge node is the bottom left corner of that box and all rotations pivot around it. That is the magique behind rotating.
  */
 
 /* -------------------------------  CACHED REFERENCES  -------------------------------- */
@@ -34,6 +35,7 @@ class PlayerPill {
         nodeA.sibling = nodeB
         nodeB.sibling = nodeA
 
+        // The first element in this array will always be the hinge node.
         this.nodes = [nodeA, nodeB]
         
         // Track horizontal and vertical state of the pill. This will be important for rotating.
@@ -113,33 +115,69 @@ class PlayerPill {
 
     updateOrientation() { this.orientation *= -1 }
 
-    // ! Some bugs -
-    // If there is a node to the bottom right of while the pill is vertical, it will not rotate.
-    // Rotating from horizontal to vertical will overwrite an existing node. this should be illegal.
+    // TODO: Handle rotation when against a wall or wall of nodes.
     rotateClockwise() {
-        let rotationOffset = (this.orientation === -1) ?  {row: -1, col: 0} : {row: 1, col: 1}
+        // If horizontal, check above the hinge node, if it vertical, check to the right of the key node
+        let rotationOffset = (this.orientation === -1) ?  {row: -1, col: 0} : {row: 0, col: 1}
 
         if(!this.isLegalMove(this.nodes[0], rotationOffset)) {
             return
         }
 
+        // Take pill off the board
         this.removePlayerPillFromBoardModel()
-        // Change the pill coords
+        
+        // rotate the pill
         if(this.orientation === -1){
             this.nodes[1].position = this.nodes[0].position
             this.nodes[0].position = this.addPositions(this.nodes[0].position, rotationOffset)
+            // update the hinge node
             this.nodes.reverse()
         } else {
-            this.nodes[1].position = this.addPositions(this.nodes[1].position, rotationOffset)
+            this.nodes[1].position = this.addPositions(this.nodes[1].position, {row: 1, col: 1})
         }
-        // Add the new coords to the board
+        // Add the new posotion to the board
         this.updatePlayerPillOnBoardModel()
-        // change key node
+
+        // Store orientation for next rotation
         this.updateOrientation()   
     }
 
+    // [
+    //     null, null
+    //     {a}, {b} 
+    // ]
+    // [
+    //     {a}, null
+    //     {b}, null
+    // ]
+
+
     rotateCounterClockwise() {
-        console.log('counter clockwise')
+        // If horizontal, check above the hinge node, if it vertical, check to the right of the key node
+        let rotationOffset = (this.orientation === 1) ? {row: 0, col: 1} : {row: -1, col: 0}
+
+        if(!this.isLegalMove(this.nodes[0], rotationOffset)) {
+            return
+        }
+
+        // Take pill off the board
+        this.removePlayerPillFromBoardModel()
+        
+        // rotate the pill
+        if(this.orientation === 1){
+            this.nodes[1].position = this.nodes[0].position
+            this.nodes[0].position = this.addPositions(this.nodes[0].position, rotationOffset)
+            // update the hinge node
+            this.nodes.reverse()
+        } else {
+            this.nodes[1].position = this.addPositions(this.nodes[1].position, {row: -1, col: -1})
+        }
+        // Add the new posotion to the board
+        this.updatePlayerPillOnBoardModel()
+
+        // Store orientation for next rotation
+        this.updateOrientation()   
     }
 
     addPositions(posObjA, posObjB) {
