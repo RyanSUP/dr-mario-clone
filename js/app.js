@@ -9,6 +9,12 @@ const boardContainer = document.querySelector('.board-container')
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
 const TOTAL_ROWS = 16
 const TOTAL_COLS = 8
+const STARTING_POSITION_A = {row:0, col:3}
+const STARTING_POSITION_B = {row:0, col:4}
+const MOVE_DOWN = {row:1, col:0}
+const MOVE_LEFT = {row:0, col:-1}
+const MOVE_RIGHT = {row:0, col:1}
+
 // These colors will determine color on the board when rendering, and also be used as symbols in the board data model
 const PILL_COLORS = ['r', 'y', 'b']
 const VIRUS_COLORS = ['R', 'Y', 'B']
@@ -22,57 +28,59 @@ class PlayerPill {
 
     constructor() {
         // Pills always start in the top center
-        let nodeA = this.createPillNode({row:0, col:3})
-        let nodeB = this.createPillNode({row:0, col:4})
+        let nodeA = this.createPillNode(STARTING_POSITION_A)
+        let nodeB = this.createPillNode(STARTING_POSITION_B)
         // Pills always start connected to their sibling
         nodeA.sibling = nodeB
         nodeB.sibling = nodeA
 
         this.nodes = [nodeA, nodeB]
+        
+        // Track horizontal and vertical state of the pill. This will be important for rotating.
+        // -1 = HORIZONTAL
+        //  1 = VERTICAL
+        this.orientation = -1
     }
+
     createPillNode(startPosition) {
         let randomIdx = Math.floor(Math.random() * PILL_COLORS.length)
         return {
             color: PILL_COLORS[randomIdx],
             sibling: null,
             position: startPosition, 
-            set newPosition (offset) {
-                this.position.row += offset.row
-                this.position.col += offset.col
-            }
         }
     }
 
     isLegalMove(positionOffset) {
+        // To determine if a move is legal, grab both nodes and put them each through some tests. If one of the nodes fail, the move is not legal.
         for(const n of this.nodes) {
-            let nextPosition = {
-                row: n.position.row + positionOffset.row,
-                col: n.position.col + positionOffset.col,
-            }
+            let nextPosition = this.addPositions(n.position, positionOffset)
+            // Prevent player from going off the board
             if(!this.isInBounds(nextPosition)) {
                 return false
             }
+            // Prevent player from moving into another node
             if(this.isColliding(n, nextPosition)) {
                 return false
-            } else {
-                // end of move.
-                // trigger check for connections
-                // make new player object
             }
         }
         // All checks passed
         return true
     }
 
-    isColliding(node, nextPosition) {
-        let npNode = getNodeFromBoardModelAt(nextPosition)
+    isColliding(node, position) {
+        let npNode = getNodeFromBoardModelAt(position)
         return (npNode === null || npNode === node.sibling) ? false : true
     }
 
     // {row: 0, col: 1} <- sample data
-    // This will only check the left and right side since being on the last row will trigger the end of the pills journey.
-    isInBounds(nextPosition) {
-        return (nextPosition.col === TOTAL_COLS || nextPosition.col < 0) ? false : true
+    isInBounds(position) { 
+        return (    
+            (position.col < TOTAL_COLS) && 
+            (position.col >= 0) &&
+            (position.row >= 0) &&
+            (position.row < TOTAL_ROWS)
+        ) 
     }
 
     isDoneMoving() {
@@ -85,13 +93,9 @@ class PlayerPill {
         }
     }
 
-    updatePlayerPillOnBoardModel() {
-        this.nodes.forEach(n => addNodeToBoardModel(n))
-
-    }
-    removePlayerPillFromBoardModel() {
-        this.nodes.forEach(n => removeNodeFromBoardModel(n))
-    }
+    updatePlayerPillOnBoardModel() { this.nodes.forEach(n => addNodeToBoardModel(n)) }
+    
+    removePlayerPillFromBoardModel() { this.nodes.forEach(n => removeNodeFromBoardModel(n)) }
 
     // position offset is an object {row: y, col: x}
     move(positionOffset) {
@@ -101,33 +105,64 @@ class PlayerPill {
             // Remove this pill from the board
             this.removePlayerPillFromBoardModel()
             // Change the pill coords
-            this.nodes.forEach(n => n.newPosition = positionOffset)
+            this.nodes.forEach(n => n.position = this.addPositions(n.position, positionOffset))
             // Add the new coords to the board
             this.updatePlayerPillOnBoardModel()
-        } else {
-            return
         }
-
     }
 
-    rotate(direction) {
-        console.log('rotate', direction)
+    updateOrientation() { this.orientation *= -1 }
+
+    rotateClockwise() {
+        if(this.orientation === -1) {
+            // If space above keyNode is null, rotate is legal
+            let rotationOffset = {row: -1, col: 0}
+            let boardSpaceAboveKeyNode = this.addPositions(this.nodes[0].position, rotationOffset)
+
+            if(this.isInBounds(boardSpaceAboveKeyNode)) {
+                if(getNodeFromBoardModelAt(boardSpaceAboveKeyNode) === null) {
+                   // rotate
+                    // Remove this pill from the board
+                    this.removePlayerPillFromBoardModel()
+                    // Change the pill coords
+                    this.nodes[1].position = this.nodes[0].position
+                    this.nodes[0].position = boardSpaceAboveKeyNode
+                    // Add the new coords to the board
+                    this.updatePlayerPillOnBoardModel()
+                   // change key node
+                    this.nodes.reverse()
+                    this.updateOrientation()    
+                }
+            }
+        }
+    }
+
+    rotateCounterClockwise() {
+        console.log('counter clockwise')
+    }
+
+    addPositions(posObjA, posObjB) {
+        return  {
+            row: posObjA.row + posObjB.row,
+            col: posObjA.col + posObjB.col
+        }
     }
 }
 /* ------------------------------- 🦻 Event Listeners 📡 -------------------------------- */
 document.addEventListener('keydown', handleKeyPress);
 
+// ! After each move, if the player can't move the pill down or if the pill is on the last row, that pill gets placed on the board and a new pill is generated.
 function handleKeyPress(evt) {
     if(evt.code === 'ArrowLeft') {
-        playerPill.move({row:0, col:-1})
+        playerPill.move(MOVE_LEFT)
     } else if(evt.code === 'ArrowRight') {
-        playerPill.move({row:0, col:1})
+        playerPill.move(MOVE_RIGHT)
     } else if(evt.code === 'ArrowDown') {
-        playerPill.move({row:1, col:0})
+        playerPill.move(MOVE_DOWN)
     } else if(evt.code === 'KeyZ') {
-        playerPill.rotate('z')
+        playerPill.rotateCounterClockwise()
     } else if(evt.code === 'KeyX') {
-        playerPill.rotate('x')
+        playerPill.rotateClockwise()
     }
     render()
 }
@@ -237,28 +272,17 @@ function getRandomizedVirusNode(handicap) {
 }
 
 /* -------------------------------  Helpers  -------------------------------- */
-function addNodeToBoardModel(node) {
-    let pos = node.position
-    boardModel[pos.row][pos.col] = node
-}
-function removeNodeFromBoardModel(node) {
-    let pos = node.position
-    boardModel[pos.row][pos.col] = null
-}
+function addNodeToBoardModel(node) { boardModel[node.position.row][node.position.col] = node }
+
+function removeNodeFromBoardModel(node) { boardModel[node.position.row][node.position.col] = null }
 
 function clampNum(num, min, max) {
-    if(num > max) {
-        return max
-    } else if (num < min) {
-        return min
-    } else {
-        return num
-    }
+    if(num > max) { return max } 
+    if (num < min) { return min }
+    return num
 }
 
-function getNodeFromBoardModelAt(positionObj) {
-    return boardModel[positionObj.row][positionObj.col]
-}
+function getNodeFromBoardModelAt(positionObj) { return boardModel[positionObj.row][positionObj.col] }
 
 function logBoard() {
     console.log('=====================')
