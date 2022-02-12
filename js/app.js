@@ -113,25 +113,29 @@ class PlayerPill {
 
     updateOrientation() { this.orientation *= -1 }
 
+    // ! Some bugs -
+    // If there is a node to the bottom right of while the pill is vertical, it will not rotate.
+    // Rotating from horizontal to vertical will overwrite an existing node. this should be illegal.
     rotateClockwise() {
-        if(this.orientation === -1) {
-            // If space above keyNode is null, rotate is legal
-            let rotationOffset = {row: -1, col: 0}
+        let rotationOffset = (this.orientation === -1) ?  {row: -1, col: 0} : {row: 1, col: 1}
 
-            if(!this.isLegalMove(this.nodes[0], rotationOffset)) {
-                return
-            }
+        if(!this.isLegalMove(this.nodes[0], rotationOffset)) {
+            return
+        }
 
-            this.removePlayerPillFromBoardModel()
-            // Change the pill coords
+        this.removePlayerPillFromBoardModel()
+        // Change the pill coords
+        if(this.orientation === -1){
             this.nodes[1].position = this.nodes[0].position
             this.nodes[0].position = this.addPositions(this.nodes[0].position, rotationOffset)
-            // Add the new coords to the board
-            this.updatePlayerPillOnBoardModel()
-            // change key node
             this.nodes.reverse()
-            this.updateOrientation()    
+        } else {
+            this.nodes[1].position = this.addPositions(this.nodes[1].position, rotationOffset)
         }
+        // Add the new coords to the board
+        this.updatePlayerPillOnBoardModel()
+        // change key node
+        this.updateOrientation()   
     }
 
     rotateCounterClockwise() {
