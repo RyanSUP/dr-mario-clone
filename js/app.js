@@ -51,18 +51,15 @@ class PlayerPill {
         }
     }
 
-    isLegalMove(positionOffset) {
-        // To determine if a move is legal, grab both nodes and put them each through some tests. If one of the nodes fail, the move is not legal.
-        for(const n of this.nodes) {
-            let nextPosition = this.addPositions(n.position, positionOffset)
-            // Prevent player from going off the board
-            if(!this.isInBounds(nextPosition)) {
-                return false
-            }
-            // Prevent player from moving into another node
-            if(this.isColliding(n, nextPosition)) {
-                return false
-            }
+    isLegalMove(n, position) {
+        let nextPosition = this.addPositions(n.position, position)
+        // Prevent player from going off the board
+        if(!this.isInBounds(nextPosition)) {
+            return false
+        }
+        // Prevent player from moving into another node
+        if(this.isColliding(n, nextPosition)) {
+            return false
         }
         // All checks passed
         return true
@@ -99,16 +96,19 @@ class PlayerPill {
 
     // position offset is an object {row: y, col: x}
     move(positionOffset) {
-        // Check if legal move
-        if(this.isLegalMove(positionOffset)) {
 
-            // Remove this pill from the board
-            this.removePlayerPillFromBoardModel()
-            // Change the pill coords
-            this.nodes.forEach(n => n.position = this.addPositions(n.position, positionOffset))
-            // Add the new coords to the board
-            this.updatePlayerPillOnBoardModel()
+        // Do nothing if the move is not legal
+        for(let n of this.nodes) {
+            if(!this.isLegalMove(n, positionOffset)) {
+                return
+            }
         }
+        // Remove this pill from the board
+        this.removePlayerPillFromBoardModel()
+        // Change the pill coords
+        this.nodes.forEach(n => n.position = this.addPositions(n.position, positionOffset))
+        // Add the new coords to the board
+        this.updatePlayerPillOnBoardModel()
     }
 
     updateOrientation() { this.orientation *= -1 }
@@ -117,23 +117,20 @@ class PlayerPill {
         if(this.orientation === -1) {
             // If space above keyNode is null, rotate is legal
             let rotationOffset = {row: -1, col: 0}
-            let boardSpaceAboveKeyNode = this.addPositions(this.nodes[0].position, rotationOffset)
 
-            if(this.isInBounds(boardSpaceAboveKeyNode)) {
-                if(getNodeFromBoardModelAt(boardSpaceAboveKeyNode) === null) {
-                   // rotate
-                    // Remove this pill from the board
-                    this.removePlayerPillFromBoardModel()
-                    // Change the pill coords
-                    this.nodes[1].position = this.nodes[0].position
-                    this.nodes[0].position = boardSpaceAboveKeyNode
-                    // Add the new coords to the board
-                    this.updatePlayerPillOnBoardModel()
-                   // change key node
-                    this.nodes.reverse()
-                    this.updateOrientation()    
-                }
+            if(!this.isLegalMove(this.nodes[0], rotationOffset)) {
+                return
             }
+
+            this.removePlayerPillFromBoardModel()
+            // Change the pill coords
+            this.nodes[1].position = this.nodes[0].position
+            this.nodes[0].position = this.addPositions(this.nodes[0].position, rotationOffset)
+            // Add the new coords to the board
+            this.updatePlayerPillOnBoardModel()
+            // change key node
+            this.nodes.reverse()
+            this.updateOrientation()    
         }
     }
 
