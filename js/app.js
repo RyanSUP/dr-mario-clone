@@ -78,7 +78,7 @@ class PlayerPill {
         }
     }
 
-    updatePlayerPillOnBoardModel() { this.nodes.forEach(n => addNodeToBoardModel(n)) }
+    placePlayerPillOnBoardModel() { this.nodes.forEach(n => addNodeToBoardModel(n)) }
     
     removePlayerPillFromBoardModel() { this.nodes.forEach(n => removeNodeFromBoardModel(n)) }
 
@@ -103,7 +103,7 @@ class PlayerPill {
         // Change the pill coords
         this.nodes.forEach(n => n.position = this.addPositions(n.position, position))
         // Add the new coords to the board
-        this.updatePlayerPillOnBoardModel()
+        this.placePlayerPillOnBoardModel()
     }
 
     updateOrientation() { this.orientation *= -1 }
@@ -136,7 +136,7 @@ class PlayerPill {
             this.nodes[1].position = this.addPositions(this.nodes[1].position, {row: 1, col: 1})
         }
         // Add the new posotion to the board
-        this.updatePlayerPillOnBoardModel()
+        this.placePlayerPillOnBoardModel()
 
         // Store orientation for next rotation
         this.updateOrientation()   
@@ -155,40 +155,44 @@ class PlayerPill {
     verticalBlockedClockwiseRotate() {
         if(this.orientation === 1) {
             let positionRightOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: 1})
-            let positionRightOfSibling = this.addPositions(this.nodes[1].position, {row: 0, col: 1})
 
             let positionLeftOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: -1})
 
             if(getNodeFromBoardModelAt(positionRightOfHinge) !== null &&
-               getNodeFromBoardModelAt(positionRightOfSibling) !== null &&
                 getNodeFromBoardModelAt(positionLeftOfHinge) === null
             ) {
                 this.removePlayerPillFromBoardModel()
                 this.nodes[1].position = this.nodes[0].position
                 this.nodes[0].position = positionLeftOfHinge
-                this.updatePlayerPillOnBoardModel()
+                this.placePlayerPillOnBoardModel()
                 this.updateOrientation()   
                 render()
             }
         }
     }
 
+    changeNodePosition(changeFunction) {
+        this.removePlayerPillFromBoardModel()
+        changeFunction()
+        this.placePlayerPillOnBoardModel()
+        this.updateOrientation()   
+        render()
+    }
+
     verticalBlockedCounterClockwiseRotate() {
         if(this.orientation === 1) {
             let positionRightOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: 1})
-            let positionRightOfSibling = this.addPositions(this.nodes[1].position, {row: 0, col: 1})
 
             let positionLeftOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: -1})
 
             if(getNodeFromBoardModelAt(positionRightOfHinge) !== null &&
-               getNodeFromBoardModelAt(positionRightOfSibling) !== null &&
                 getNodeFromBoardModelAt(positionLeftOfHinge) === null
             ) {
                 this.removePlayerPillFromBoardModel()
                 this.nodes[1].position = positionLeftOfHinge
                 this.nodes[0].position = this.nodes[0].position
                 this.nodes.reverse()
-                this.updatePlayerPillOnBoardModel()
+                this.placePlayerPillOnBoardModel()
                 this.updateOrientation()   
                 render()
             }
@@ -220,7 +224,7 @@ class PlayerPill {
             this.nodes[1].position = this.addPositions(this.nodes[1].position, {row: -1, col: -1})
         }
         // Add the new posotion to the board
-        this.updatePlayerPillOnBoardModel()
+        this.placePlayerPillOnBoardModel()
 
         // Store orientation for next rotation
         this.updateOrientation()   
@@ -260,7 +264,7 @@ function init() {
     playerPill = new PlayerPill()
     // Create the empty model board
     initBoardModel()
-    playerPill.updatePlayerPillOnBoardModel()
+    playerPill.placePlayerPillOnBoardModel()
     // set starting viruses
     virusCount = 4;
     initViruses()
