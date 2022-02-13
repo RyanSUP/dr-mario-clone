@@ -5,6 +5,10 @@
  * hinge Node - Image a 2x2 box around a 1x2 pill, the hinge node is the bottom left corner of that box and all rotations pivot around it. That is the magique behind rotating.
  */
 
+// TODO: Exit rotation / movements back to handler so it can render
+// TODO: Fully implement blocked rotation
+// TODO: Place a pill and get a new pill
+
 /* -------------------------------  CACHED REFERENCES  -------------------------------- */
 const boardContainer = document.querySelector('.board-container')
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
@@ -12,9 +16,20 @@ const TOTAL_ROWS = 16
 const TOTAL_COLS = 8
 const STARTING_POSITION_A = {row:0, col:3}
 const STARTING_POSITION_B = {row:0, col:4}
-const MOVE_DOWN = {row:1, col:0}
-const MOVE_LEFT = {row:0, col:-1}
-const MOVE_RIGHT = {row:0, col:1}
+
+// These are all of the possible positions around a spoce on the board
+const TOP           = {row: -1, col:  0}
+const TOP_LEFT      = {row: -1, col: -1} 
+const TOP_RIGHT     = {row: -1, col:  1} 
+const LEFT          = {row:  0, col: -1} 
+const RIGHT         = {row:  0, col:  1} 
+const BOTTOM        = {row:  1, col:  0} 
+const BOTTOM_LEFT   = {row:  1, col: -1} 
+const BOTTOM_RIGHT  = {row:  1, col:  1} 
+
+// Pill orientations
+const HORIZONTAL = -1
+const VERTICAL = 1
 
 // These colors will determine color on the board when rendering, and also be used as symbols in the board data model
 const PILL_COLORS = ['r', 'y', 'b']
@@ -38,10 +53,8 @@ class PlayerPill {
         // The first element in this array will always be the hinge node.
         this.nodes = [nodeA, nodeB]
         
-        // Track horizontal and vertical state of the pill. This will be important for rotating.
-        // -1 = HORIZONTAL
-        //  1 = VERTICAL
-        this.orientation = -1
+        // This is important for rotating.
+        this.orientation = HORIZONTAL
     }
 
     createPillNode(startPosition) {
@@ -83,64 +96,26 @@ class PlayerPill {
     removePlayerPillFromBoardModel() { this.nodes.forEach(n => removeNodeFromBoardModel(n)) }
 
     // position offset is an object {row: y, col: x}
-    move(position) {
+    move(positionOffset) {
 
         // Do nothing if the move is not legal
         for(let n of this.nodes) {
-            let nextPosition = this.addPositions(n.position, position)
+            let targetPosition = this.addPositions(n.position, positionOffset)
             // Prevent player from going off the board
-            if(!this.isInBounds(nextPosition)) {
+            if(!this.isInBounds(targetPosition)) {
                 return false
             }
             // Prevent player from moving into another node
-            if(this.isColliding(n, nextPosition)) {
+            if(this.isColliding(n, targetPosition)) {
                 return false
             }
         }
-
-        // Remove this pill from the board
-        this.removePlayerPillFromBoardModel()
-        // Change the pill coords
-        this.nodes.forEach(n => n.position = this.addPositions(n.position, position))
-        // Add the new coords to the board
-        this.placePlayerPillOnBoardModel()
+        this.updatePillPosition(()=> {
+            this.nodes.forEach(n => n.position = this.addPositions(n.position, positionOffset))
+        })
     }
 
     updateOrientation() { this.orientation *= -1 }
-
-    // TODO: Handle rotation when against a wall or wall of nodes.
-  
-    rotateClockwise() {
-        // If horizontal, check above the hinge node, if it vertical, check to the right of the hinge node
-        let rotationOffset = (this.orientation === -1) ?  {row: -1, col: 0} : {row: 0, col: 1}
-        let nextPosition = this.addPositions(this.nodes[0].position, rotationOffset)
-
-        if(!this.isInBounds(nextPosition)) {
-            return false
-        }
-        // Prevent player from moving into another node
-        if(this.isColliding(this.nodes[0], nextPosition)) {
-            return false
-        }
-
-        // Take pill off the board
-        this.removePlayerPillFromBoardModel()
-        
-        // rotate the pill
-        if(this.orientation === -1){
-            this.nodes[1].position = this.nodes[0].position
-            this.nodes[0].position = nextPosition
-            // update the hinge node
-            this.nodes.reverse()
-        } else {
-            this.nodes[1].position = this.addPositions(this.nodes[1].position, {row: 1, col: 1})
-        }
-        // Add the new posotion to the board
-        this.placePlayerPillOnBoardModel()
-
-        // Store orientation for next rotation
-        this.updateOrientation()   
-    }
 
   /**
      * If the pill is against something to the left, all rotations are normal
@@ -153,10 +128,10 @@ class PlayerPill {
      *   Then shift hinge to the left 1 space and carry out the vertical to horizontal rotation
      */
     verticalBlockedClockwiseRotate() {
-        if(this.orientation === 1) {
-            let positionRightOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: 1})
+        if(this.orientation === VERTICAL) {
+            let positionRightOfHinge = this.addPositions(this.nodes[0].position, RIGHT)
 
-            let positionLeftOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: -1})
+            let positionLeftOfHinge = this.addPositions(this.nodes[0].position, LEFT)
 
             if(getNodeFromBoardModelAt(positionRightOfHinge) !== null &&
                 getNodeFromBoardModelAt(positionLeftOfHinge) === null
@@ -166,24 +141,22 @@ class PlayerPill {
                 this.nodes[0].position = positionLeftOfHinge
                 this.placePlayerPillOnBoardModel()
                 this.updateOrientation()   
-                render()
             }
         }
     }
 
-    changeNodePosition(changeFunction) {
+    updatePillPosition(setNodePositions) {
         this.removePlayerPillFromBoardModel()
-        changeFunction()
+        setNodePositions()
         this.placePlayerPillOnBoardModel()
-        this.updateOrientation()   
-        render()
+        render() // for now. Should render when exiting the handler.
     }
 
     verticalBlockedCounterClockwiseRotate() {
-        if(this.orientation === 1) {
-            let positionRightOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: 1})
+        if(this.orientation === VERTICAL) {
+            let positionRightOfHinge = this.addPositions(this.nodes[0].position, RIGHT)
 
-            let positionLeftOfHinge = this.addPositions(this.nodes[0].position, {row: 0, col: -1})
+            let positionLeftOfHinge = this.addPositions(this.nodes[0].position, LEFT)
 
             if(getNodeFromBoardModelAt(positionRightOfHinge) !== null &&
                 getNodeFromBoardModelAt(positionLeftOfHinge) === null
@@ -194,42 +167,77 @@ class PlayerPill {
                 this.nodes.reverse()
                 this.placePlayerPillOnBoardModel()
                 this.updateOrientation()   
-                render()
             }
         }
     }
 
-    rotateCounterClockwise() {
-        // If horizontal, check above the hinge node, if it vertical, check to the right of the key node
-        let rotationOffset = (this.orientation === 1) ? {row: 0, col: 1} : {row: -1, col: 0}
-
-        if(!this.isInBounds(this.addPositions(this.nodes[0].position, rotationOffset))) {
-            return false
-        }
-        // Prevent player from moving into another node
-        if(this.isColliding(this.nodes[0], this.addPositions(this.nodes[0].position, rotationOffset))) {
-            return false
-        }
-
-        // Take pill off the board
-        this.removePlayerPillFromBoardModel()
+    handleBlockedRotation(direction) {
+        let positionRightOfHinge = this.addPositions(this.nodes[0].position, RIGHT)
+        let positionLeftOfHinge = this.addPositions(this.nodes[0].position, LEFT)
         
-        // rotate the pill
-        if(this.orientation === 1){
-            this.nodes[1].position = this.nodes[0].position
-            this.nodes[0].position = this.addPositions(this.nodes[0].position, rotationOffset)
-            // update the hinge node
-            this.nodes.reverse()
-        } else {
-            this.nodes[1].position = this.addPositions(this.nodes[1].position, {row: -1, col: -1})
+        if(getNodeFromBoardModelAt(positionRightOfHinge) !== null &&
+           getNodeFromBoardModelAt(positionLeftOfHinge) === null
+        ) {
+            if(direction === 'clockwise') {
+                updatePillPosition(() => {
+                    this.nodes[1].position = this.nodes[0].position
+                    this.nodes[0].position = positionLeftOfHinge
+                    this.updateOrientation()   
+                })
+            } else {
+                updatePillPosition(() => {
+                    this.nodes[1].position = positionLeftOfHinge
+                    this.nodes[0].position = this.nodes[0].position
+                    this.nodes.reverse() // set new hinge
+                    this.updateOrientation()    
+                })
+            }
         }
-        // Add the new posotion to the board
-        this.placePlayerPillOnBoardModel()
-
-        // Store orientation for next rotation
-        this.updateOrientation()   
     }
 
+    rotate(direction) {
+        // If horizontal, check above the hinge node, if it vertical, check to the right of the hinge node
+        let rotationOffset = (this.orientation === HORIZONTAL) ?  TOP : RIGHT
+        let rotationTargetPosition = this.addPositions(this.nodes[0].position, rotationOffset)
+    
+        if(!this.isInBounds(rotationTargetPosition)) {
+            return false
+        }
+    
+        // Prevent player from moving into another node
+        if(this.isColliding(this.nodes[0], rotationTargetPosition)) {
+            // do the special rotation 
+            // the only time a player shouldn't be able to rotate is if the bottom move node is sandwiched on 2 opposite faces.
+            return false
+        }
+    
+        if(direction === 'cw') {
+            this.updatePillPosition(()=> {
+                if(this.orientation === HORIZONTAL){
+                    this.nodes[1].position = this.nodes[0].position
+                    this.nodes[0].position = rotationTargetPosition
+                    // change the hinge node
+                    this.nodes.reverse()
+                } else {
+                    this.nodes[1].position = this.addPositions(this.nodes[1].position, BOTTOM_RIGHT)
+                }
+                this.updateOrientation()   
+            })
+        } else {
+            this.updatePillPosition(() => {
+                if(this.orientation === VERTICAL){
+                    this.nodes[1].position = this.nodes[0].position
+                    this.nodes[0].position = rotationTargetPosition
+                    // change the hinge node
+                    this.nodes.reverse()
+                } else {
+                    this.nodes[1].position = this.addPositions(this.nodes[1].position, TOP_LEFT)
+                }
+                this.updateOrientation()   
+            })
+        }
+    }
+    
     addPositions(posObjA, posObjB) {
         return  {
             row: posObjA.row + posObjB.row,
@@ -243,15 +251,15 @@ document.addEventListener('keydown', handleKeyPress);
 // ! After each move, if the player can't move the pill down or if the pill is on the last row, that pill gets placed on the board and a new pill is generated.
 function handleKeyPress(evt) {
     if(evt.code === 'ArrowLeft') {
-        playerPill.move(MOVE_LEFT)
+        playerPill.move(LEFT)
     } else if(evt.code === 'ArrowRight') {
-        playerPill.move(MOVE_RIGHT)
+        playerPill.move(RIGHT)
     } else if(evt.code === 'ArrowDown') {
-        playerPill.move(MOVE_DOWN)
+        playerPill.move(BOTTOM)
     } else if(evt.code === 'KeyZ') {
-        playerPill.rotateCounterClockwise()
+        playerPill.rotate('ccw')
     } else if(evt.code === 'KeyX') {
-        playerPill.rotateClockwise()
+        playerPill.rotate('cw')
     }
     render()
 }
