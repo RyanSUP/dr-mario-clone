@@ -5,7 +5,6 @@
  * hinge Node - Image a 2x2 box around a 1x2 pill, the hinge node is the bottom left corner of that box and all rotations pivot around it. That is the magique behind rotating.
  */
 
-// TODO: Place a pill and get a new pill
 
 /* -------------------------------  CACHED REFERENCES  -------------------------------- */
 const boardContainer = document.querySelector('.board-container')
@@ -38,9 +37,8 @@ const VERTICAL = 1
 // These colors will determine color on the board when rendering, and also be used as symbols in the board data model
 const PILL_COLORS = ['r', 'y', 'b']
 const VIRUS_COLORS = ['R', 'Y', 'B']
-// const VIRUS_COLORS = ['R']
 
-
+// Board stuff
 const sqDivs = [] // The boardview
 const boardModel = []; // The board model
 /* -------------------------------  Variables  -------------------------------- */
@@ -128,7 +126,6 @@ class PlayerPill {
         this.removePlayerPillFromBoardModel()
         setNodePositions()
         this.placePlayerPillOnBoardModel()
-        render() // for now. Should render when exiting the handler.
     }
 
     // If the player rotates the pill while vertical and blocked on the right side, shift the pill 1 space to the left and carry out rotation
@@ -156,7 +153,7 @@ class PlayerPill {
         }
     }
     // ! BUG
-    // When trying to rotate on first tow there is an error because the target is out of bounds. Does not break game.
+    // When trying to rotate on first row there is an error because the target is out of bounds. Does not break game.
     rotate(direction) {
 
         let rotationOffset = (this.orientation === HORIZONTAL) ? TOP : RIGHT
@@ -209,35 +206,41 @@ class PlayerPill {
 /* ------------------------------- 🦻 Event Listeners 📡 -------------------------------- */
 document.addEventListener('keydown', handleKeyPress);
 
-// ! After each move, if the player can't move the pill down or if the pill is on the last row, that pill gets placed on the board and a new pill is generated.
 function handleKeyPress(evt) {
-    if (evt.code === 'ArrowLeft') {
-        playerPill.move(LEFT)
-    } else if (evt.code === 'ArrowRight') {
-        playerPill.move(RIGHT)
-    } else if (evt.code === 'ArrowDown') {
-        playerPill.move(BOTTOM)
-    } else if (evt.code === 'KeyZ') {
-        playerPill.rotate(COUNTER_CLOCKWISE)
-    } else if (evt.code === 'KeyX') {
-        playerPill.rotate(CLOCKWISE)
+    if(playerPill !== null) {
+        switch (evt.code) {
+            case 'ArrowLeft':
+                playerPill.move(LEFT)
+                break
+            case 'ArrowRight':
+                playerPill.move(RIGHT)
+                break
+            case 'ArrowDown':
+                playerPill.move(BOTTOM)
+                break
+            case 'KeyZ':
+                playerPill.rotate(COUNTER_CLOCKWISE)
+                break
+            case 'KeyX':
+                playerPill.rotate(CLOCKWISE)
+                break
+        }
+        render()
     }
-    // Check if pill can't move again
-
-
-    render()
 }
+
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
-// ! After I implement the game loop player stuff will be in its own function that handles spawning a new pill
 function init() {
     // Create the HTML (View) board
     initSqDivs()
     // Init board model to all nulls
     initBoardModel()
     // set starting viruses
-    virusCount = 180;
-    initViruses()
+    virusCount = 18;
+    initVirusesOnBoardModel()
     // * dont reset the score
+    spawnPlayerPill()
+
     render()
 }
 
@@ -269,7 +272,7 @@ function initBoardModel() {
     }
 }
 
-function initViruses() {
+function initVirusesOnBoardModel() {
     for (let i = 0; i < virusCount; i++) {
         let v = getRandomizedVirusNode(8)
         boardModel[v.position.row][v.position.col] = v
@@ -298,12 +301,9 @@ function renderBoard() {
             }
         }
     }
-    // This is for testing. print all the data to the log
-    // logBoard()
 }
 
 /* ------------------------------- 🦠 Node / Pill / Virus Functions 🧫 -------------------------------- */
-
 function decouplePillNodes(node) {
     // Remove the node from its sibling
     node.sibling.sibling = null
@@ -315,6 +315,7 @@ function decouplePillNodes(node) {
 // This can be adjusted to increase difficulty
 // TODO: Increase virus count and lower handicap as levels increase
 // ! Viruses can spawn ontop of eachother and mess up the total! Need to fix!
+// ! Viruses can spawn in a matched pattern
 function getRandomizedVirusNode(handicap) {
     // get random color. 
     // PILL_COLORS and VIRUS_COLORS will always be the same length, so it doesn't matter which I choose here.
@@ -369,27 +370,37 @@ function isGameOver() {
 // ! ---- BUG 
 // TODO: fix bug that skips the first pill positions render.
 function runGameLoop() {
-    // check for game over
-    if(isGameOver) {
-        // spawn a pill
-        playerPill = new PlayerPill()
-        let gameLoop = setInterval(() => {
-            // move the pill
-            let moveResult = playerPill.move(BOTTOM)
-            if(moveResult === false) {
-                // Spawn a new pill
-                playerPill = new PlayerPill()
-            }
+
+    let gameLoop = setInterval(() => {
+        // move the pill
+        let moveResult = playerPill.move(BOTTOM)
+        if(moveResult === false) {
+
+            // Wait for...
             // 1 check for connections
             // 2 clear connections (remember to decouple)
+            removeMatchesFromBoard()
             // 3 drop floating nodes
             // Repeat 1 - 3 until there are no more connections
-            render()
-        }, gameSpeed)
-    }
+
+            // Then
+            // Spawn a new pill
+            if(isGameOver()) {
+                playerPill = null
+                clearInterval(gameLoop)
+                console.log('game over')
+                // render game over screen
+            } else {
+                spawnPlayerPill()
+            }
+            
+        }
+        render()
+    }, gameSpeed)
+
 }
 
-function countCapitalsOnBoard() {
+function countCapitalsOnBoardModel() {
     const searchRegExp = RegExp('Y|R|B', 'g');
     let boardAsString = ''
     for(let row of boardModel) {
@@ -408,12 +419,7 @@ function countCapitalsOnBoard() {
 
 function getPositionObj(row, col) { return { row: row, col: col } }
 
-/* -------------------------------  Main  -------------------------------- */
-init()
-
 /* -------------------------------  Finding Matches  ----------------------*/
-
-// TODO: Filter duplicates
 
 function getAllMatchingPositionsOnBoard(array2D) {
     let matchingPositions = []
@@ -441,8 +447,6 @@ function getAllMatchingPositionsOnBoardCol(array2D) {
     return matchingPositions
 }
 
-
-
 function removeMatchesFromBoard() {
     // find all the matches
     let boardAsColumns = getBoardColumnsAs2DArray()
@@ -456,13 +460,14 @@ function removeMatchesFromBoard() {
 
     uniqueMatches.forEach(node => {
         console.log('removing',node)
+        if(node.sibling !== null) {
+            decouplePillNodes(node)
+        }
         removeNodeFromBoardModel(node)
-        // decouplePillNodes(node)
         console.log('Success!')
     })
     console.log(boardModel)
-    console.log(countCapitalsOnBoard())
-    render()
+    console.log(countCapitalsOnBoardModel())
 }
 
 // Search the array for repeating characters
@@ -475,7 +480,7 @@ function getIndexesOfMatchingNodesFromArray(arr) {
         }
     })
     let searchString = colorMap.join('')
-    const searchRegExp = RegExp('y{4,}|r{4,}|b{4,}', 'gi');
+    const searchRegExp = RegExp('y{4,}|r{4,}|b{4,}', 'gi')
     let searchResult = searchRegExp.exec(searchString)
     let resultIndexes = []
     if(searchResult !== null) {   
@@ -502,3 +507,8 @@ function getBoardColumnsAs2DArray() {
     }
     return mappedArr
 }
+
+
+
+/* -------------------------------  Main  -------------------------------- */
+init()
