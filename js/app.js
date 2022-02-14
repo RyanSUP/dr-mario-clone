@@ -16,18 +16,18 @@ const TOTAL_ROWS = 16
 const TOTAL_COLS = 8
 
 // Pills will always spawn here. If one of these is taken when a pill spawns, the player loses.
-const SPAWN_POSITION_A = {row:0, col:3}
-const SPAWN_POSITION_B = {row:0, col:4}
+const SPAWN_POSITION_A = { row: 0, col: 3 }
+const SPAWN_POSITION_B = { row: 0, col: 4 }
 
 // These are all of the possible positions around a spoce on the board
-const TOP           = {row: -1, col:  0}
-const TOP_LEFT      = {row: -1, col: -1} 
-const TOP_RIGHT     = {row: -1, col:  1} 
-const LEFT          = {row:  0, col: -1} 
-const RIGHT         = {row:  0, col:  1} 
-const BOTTOM        = {row:  1, col:  0} 
-const BOTTOM_LEFT   = {row:  1, col: -1} 
-const BOTTOM_RIGHT  = {row:  1, col:  1}
+const TOP = { row: -1, col: 0 }
+const TOP_LEFT = { row: -1, col: -1 }
+const TOP_RIGHT = { row: -1, col: 1 }
+const LEFT = { row: 0, col: -1 }
+const RIGHT = { row: 0, col: 1 }
+const BOTTOM = { row: 1, col: 0 }
+const BOTTOM_LEFT = { row: 1, col: -1 }
+const BOTTOM_RIGHT = { row: 1, col: 1 }
 
 // Rotation
 const COUNTER_CLOCKWISE = -1
@@ -60,7 +60,7 @@ class PlayerPill {
 
         // The first element in this array will always be the hinge node.
         this.nodes = [nodeA, nodeB]
-        
+
         // This is important for rotating.
         this.orientation = HORIZONTAL
     }
@@ -70,7 +70,7 @@ class PlayerPill {
         return {
             color: PILL_COLORS[randomIdx],
             sibling: null,
-            position: startPosition, 
+            position: startPosition,
         }
     }
 
@@ -79,13 +79,13 @@ class PlayerPill {
         return (npNode === null || npNode === node.sibling) ? false : true
     }
 
-    isInBounds(position) { 
-        return (    
-            (position.col < TOTAL_COLS) && 
+    isInBounds(position) {
+        return (
+            (position.col < TOTAL_COLS) &&
             (position.col >= 0) &&
             (position.row >= 0) &&
             (position.row < TOTAL_ROWS)
-        ) 
+        )
     }
 
     isDoneMoving() {
@@ -99,26 +99,26 @@ class PlayerPill {
     }
 
     placePlayerPillOnBoardModel() { this.nodes.forEach(n => addNodeToBoardModel(n)) }
-    
+
     removePlayerPillFromBoardModel() { this.nodes.forEach(n => removeNodeFromBoardModel(n)) }
 
     // position offset is an object {row: y, col: x}
     move(positionOffset) {
 
         // Do nothing if the move is not legal
-        for(let n of this.nodes) {
+        for (let n of this.nodes) {
             let targetPosition = this.addPositions(n.position, positionOffset)
             // Prevent player from going off the board
-            if(!this.isInBounds(targetPosition)) {
+            if (!this.isInBounds(targetPosition)) {
                 return false
             }
             // Prevent player from moving into another node
-            if(this.isColliding(n, targetPosition)) {
+            if (this.isColliding(n, targetPosition)) {
                 return false
             }
         }
         // If the move is legal, updates the positon
-        this.updatePillPosition(()=> {
+        this.updatePillPosition(() => {
             this.nodes.forEach(n => n.position = this.addPositions(n.position, positionOffset))
         })
     }
@@ -136,22 +136,22 @@ class PlayerPill {
     handleBlockedRotation(direction) {
         let positionRightOfHinge = this.addPositions(this.nodes[0].position, RIGHT)
         let positionLeftOfHinge = this.addPositions(this.nodes[0].position, LEFT)
-        
-        if(getNodeFromBoardModelAt(positionRightOfHinge) !== null &&
-           getNodeFromBoardModelAt(positionLeftOfHinge) === null
+
+        if (getNodeFromBoardModelAt(positionRightOfHinge) !== null &&
+            getNodeFromBoardModelAt(positionLeftOfHinge) === null
         ) {
-            if(direction === CLOCKWISE) {
+            if (direction === CLOCKWISE) {
                 this.updatePillPosition(() => {
                     this.nodes[1].position = this.nodes[0].position
                     this.nodes[0].position = positionLeftOfHinge
-                    this.updateOrientation()   
+                    this.updateOrientation()
                 })
             } else {
                 this.updatePillPosition(() => {
                     this.nodes[1].position = positionLeftOfHinge
                     this.nodes[0].position = this.nodes[0].position
                     this.nodes.reverse() // set new hinge
-                    this.updateOrientation()    
+                    this.updateOrientation()
                 })
             }
         }
@@ -159,30 +159,21 @@ class PlayerPill {
 
     rotate(direction) {
         // If horizontal, check above the hinge node, if it vertical, check to the right of the hinge node
-        let rotationOffset = (this.orientation === HORIZONTAL) ?  TOP : RIGHT
+        let rotationOffset = (this.orientation === HORIZONTAL) ? TOP : RIGHT
         let rotationTargetPosition = this.addPositions(this.nodes[0].position, rotationOffset)
-    
-        // TODO (low) Investigate if this is needed. isColliding sort of checks for bounds since it is looking for null and positions off board are undefined.
-        if(!this.isInBounds(rotationTargetPosition)) {
-            return false
-        }
-    
-        // if(this.orientation === VERTICAL && this.isColliding(rotationTargetPosition)) {
-        //     // do the blocked rotation
-        // }
-        
+
         // Prevent player from moving into another node
-        if(this.isColliding(this.nodes[0], rotationTargetPosition)) {
-            if(this.orientation === VERTICAL) { this.handleBlockedRotation(direction) }
+        if (this.isColliding(this.nodes[0], rotationTargetPosition)) {
+            if (this.orientation === VERTICAL) { this.handleBlockedRotation(direction) }
             return
         }
 
         (direction === CLOCKWISE) ? this.rotateClockwise(rotationTargetPosition) : this.rotateCounterClockwise(rotationTargetPosition)
     }
-    
+
     rotateClockwise(rotationTargetPosition) {
-        this.updatePillPosition(()=> {
-            if(this.orientation === HORIZONTAL){
+        this.updatePillPosition(() => {
+            if (this.orientation === HORIZONTAL) {
                 this.nodes[1].position = this.nodes[0].position
                 this.nodes[0].position = rotationTargetPosition
                 // change the hinge node
@@ -190,13 +181,13 @@ class PlayerPill {
             } else {
                 this.nodes[1].position = this.addPositions(this.nodes[1].position, BOTTOM_RIGHT)
             }
-            this.updateOrientation()   
+            this.updateOrientation()
         })
     }
 
     rotateCounterClockwise(rotationTargetPosition) {
         this.updatePillPosition(() => {
-            if(this.orientation === HORIZONTAL){
+            if (this.orientation === HORIZONTAL) {
                 this.nodes[1].position = this.addPositions(this.nodes[1].position, TOP_LEFT)
             } else {
                 this.nodes[1].position = this.nodes[0].position
@@ -204,12 +195,12 @@ class PlayerPill {
                 // change the hinge node
                 this.nodes.reverse()
             }
-            this.updateOrientation()   
+            this.updateOrientation()
         })
     }
 
     addPositions(posObjA, posObjB) {
-        return  {
+        return {
             row: posObjA.row + posObjB.row,
             col: posObjA.col + posObjB.col
         }
@@ -220,15 +211,15 @@ document.addEventListener('keydown', handleKeyPress);
 
 // ! After each move, if the player can't move the pill down or if the pill is on the last row, that pill gets placed on the board and a new pill is generated.
 function handleKeyPress(evt) {
-    if(evt.code === 'ArrowLeft') {
+    if (evt.code === 'ArrowLeft') {
         playerPill.move(LEFT)
-    } else if(evt.code === 'ArrowRight') {
+    } else if (evt.code === 'ArrowRight') {
         playerPill.move(RIGHT)
-    } else if(evt.code === 'ArrowDown') {
+    } else if (evt.code === 'ArrowDown') {
         playerPill.move(BOTTOM)
-    } else if(evt.code === 'KeyZ') {
+    } else if (evt.code === 'KeyZ') {
         playerPill.rotate(COUNTER_CLOCKWISE)
-    } else if(evt.code === 'KeyX') {
+    } else if (evt.code === 'KeyX') {
         playerPill.rotate(CLOCKWISE)
     }
     // Check if pill can't move again
@@ -264,31 +255,31 @@ function init() {
 // The array is 2D because the data model is and this will make it easier to translate
 // the model to the view
 function initSqDivs() {
-    for(let row = 0; row < TOTAL_ROWS; row++) {
+    for (let row = 0; row < TOTAL_ROWS; row++) {
         const divsInRow = []
-        for(let col = 0; col < TOTAL_COLS; col++) {
+        for (let col = 0; col < TOTAL_COLS; col++) {
             const div = document.createElement('div')
             div.className = 'sq'
             // ^ looks like this -->  <div class="sq"></div>
             boardContainer.append(div)
             divsInRow.push(div)
         }
-        sqDivs.push(divsInRow) 
+        sqDivs.push(divsInRow)
     }
 }
 
 function initBoardModel() {
-    for(let row = 0; row < TOTAL_ROWS; row++) {
+    for (let row = 0; row < TOTAL_ROWS; row++) {
         const columnsInRow = []
-        for(let col = 0; col < TOTAL_COLS; col++) {
+        for (let col = 0; col < TOTAL_COLS; col++) {
             columnsInRow.push(null)
         }
-        boardModel.push(columnsInRow) 
+        boardModel.push(columnsInRow)
     }
 }
 
 function initViruses() {
-    for(let i = 0; i < virusCount; i++) {
+    for (let i = 0; i < virusCount; i++) {
         let v = getRandomizedVirusNode(8)
         boardModel[v.position.row][v.position.col] = v
     }
@@ -307,10 +298,10 @@ function render() {
 // Reset all the div.sq classes default, then add classes depending on what is at the position.
 // Reseting the class is needed to properly display movement.
 function renderBoard() {
-    for(let row = 0; row < TOTAL_ROWS; row++) {
-        for(let col = 0; col < TOTAL_COLS; col++) {
+    for (let row = 0; row < TOTAL_ROWS; row++) {
+        for (let col = 0; col < TOTAL_COLS; col++) {
             sqDivs[row][col].className = 'sq'
-            if(boardModel[row][col] !== null) {
+            if (boardModel[row][col] !== null) {
                 let node = boardModel[row][col]
                 sqDivs[row][col].classList.add(node.color)
             }
@@ -343,7 +334,7 @@ function getRandomizedVirusNode(handicap) {
 
     return {
         color: VIRUS_COLORS[randomIdx],
-        position: {row: randomRow, col: randomCol},
+        position: { row: randomRow, col: randomCol },
         sibling: null // Virus will never have a sibling, but I'll keep this property for now.
     }
 }
@@ -354,7 +345,7 @@ function addNodeToBoardModel(node) { boardModel[node.position.row][node.position
 function removeNodeFromBoardModel(node) { boardModel[node.position.row][node.position.col] = null }
 
 function clampNum(num, min, max) {
-    if(num > max) { return max } 
+    if (num > max) { return max }
     if (num < min) { return min }
     return num
 }
