@@ -38,6 +38,8 @@ const VERTICAL = 1
 // These colors will determine color on the board when rendering, and also be used as symbols in the board data model
 const PILL_COLORS = ['r', 'y', 'b']
 const VIRUS_COLORS = ['R', 'Y', 'B']
+// const VIRUS_COLORS = ['R']
+
 
 const sqDivs = [] // The boardview
 const boardModel = []; // The board model
@@ -316,7 +318,7 @@ function decouplePillNodes(node) {
 function getRandomizedVirusNode(handicap) {
     // get random color. 
     // PILL_COLORS and VIRUS_COLORS will always be the same length, so it doesn't matter which I choose here.
-    let randomIdx = Math.floor(Math.random() * PILL_COLORS.length)
+    let randomIdx = Math.floor(Math.random() * VIRUS_COLORS.length)
     let randomRow = Math.floor(Math.random() * TOTAL_ROWS + handicap)
     randomRow = clampNum(randomRow, handicap, 15)
     let randomCol = Math.floor(Math.random() * TOTAL_COLS)
@@ -387,10 +389,31 @@ function runGameLoop() {
     }
 }
 
+function countCapitalsOnBoard() {
+    const searchRegExp = RegExp('Y|R|B', 'g');
+    let boardAsString = ''
+    for(let row of boardModel) {
+        let r = ''
+        for(let col of row) {
+            if(col !== '-') {
+                r += col.color
+            }
+        }
+        boardAsString += r
+    }
+    let searchResults = [...boardAsString.matchAll(searchRegExp)]
+    // In the game this will update the remaining viruses
+    console.log('Remaining Capitals', searchResults.length)
+}
+
+function getPositionObj(row, col) { return { row: row, col: col } }
+
 /* -------------------------------  Main  -------------------------------- */
 init()
 
-/* -------------------------------  Import from sandbox  ----------------------*/
+/* -------------------------------  Finding Matches  ----------------------*/
+
+// TODO: Filter duplicates
 
 function getAllMatchingPositionsOnBoard(array2D) {
     let matchingPositions = []
@@ -418,16 +441,24 @@ function getAllMatchingPositionsOnBoardCol(array2D) {
     return matchingPositions
 }
 
+
+
 function removeMatchesFromBoard() {
     // find all the matches
     let boardAsColumns = getBoardColumnsAs2DArray()
-    let rowMatches = getAllMatchingPositionsOnBoard(boardModel)
-    let colMatches = getAllMatchingPositionsOnBoardCol(boardAsColumns)
-    let allMatches = rowMatches.concat(colMatches)
-    console.log(allMatches)
-    allMatches.forEach(matchPosition => {
-        node = getNodeFromBoardModelAt(matchPosition)
+    let matchingPositionsInRows = getAllMatchingPositionsOnBoard(boardModel)
+    let matchingPositionsInCols = getAllMatchingPositionsOnBoardCol(boardAsColumns)
+    let allMatchingPositions = matchingPositionsInRows.concat(matchingPositionsInCols)
+
+    let uniqueMatches = new Set()
+    allMatchingPositions.forEach(position => uniqueMatches.add(getNodeFromBoardModelAt(position)))
+    console.log(uniqueMatches)
+
+    uniqueMatches.forEach(node => {
+        console.log('removing',node)
         removeNodeFromBoardModel(node)
+        // decouplePillNodes(node)
+        console.log('Success!')
     })
     console.log(boardModel)
     console.log(countCapitalsOnBoard())
@@ -471,22 +502,3 @@ function getBoardColumnsAs2DArray() {
     }
     return mappedArr
 }
-
-function countCapitalsOnBoard() {
-    const searchRegExp = RegExp('Y|R|B', 'g');
-    let boardAsString = ''
-    for(let row of boardModel) {
-        let r = ''
-        for(let col of row) {
-            if(col !== '-') {
-                r += col.color
-            }
-        }
-        boardAsString += r
-    }
-    let searchResults = [...boardAsString.matchAll(searchRegExp)]
-    // In the game this will update the remaining viruses
-    console.log('Remaining Capitals', searchResults.length)
-}
-
-function getPositionObj(row, col) { return { row: row, col: col } }
