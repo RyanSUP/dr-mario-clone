@@ -42,9 +42,10 @@ const VIRUS_COLORS = ['R', 'Y', 'B']
 const sqDivs = [] // The boardview
 const boardModel = []; // The board model
 /* -------------------------------  Variables  -------------------------------- */
-let virusCount;
-let playerPill;
-let gameSpeed = 400;
+let virusCount
+let playerPill
+let gameSpeed = 400
+let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
 /* ------------------------------- 🎮 Player Pill 💊 -------------------------------- */
 class PlayerPill {
 
@@ -230,8 +231,9 @@ function init() {
     // Init board model to all nulls
     initBoardModel()
     // set starting viruses
-    virusCount = 18;
+    virusCount = 4;
     initVirusesOnBoardModel()
+    countCapitalsOnBoardModel() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
     // * dont reset the score
     spawnPlayerPill()
     render()
@@ -363,7 +365,7 @@ function logBoard() {
     console.log('=====================')
 }
 
-function isGameOver() {
+function checkForBlockedSpawn() {
     return (getNodeFromBoardModelAt(SPAWN_POSITION_A) !== '-' || 
             getNodeFromBoardModelAt(SPAWN_POSITION_B) !== '-' ) ? true : false 
 }
@@ -375,9 +377,6 @@ function dropFloatingNodes() {
     while(movedANode) {
         let currentRowIndex = TOTAL_ROWS - 2 // (start on the second to last row)
         movedANode = false
-        // let interval = setInterval(()=> {
-
-        // })
         while(currentRowIndex > -1) {
             let row = boardModel[currentRowIndex]
             let nodes = []
@@ -441,20 +440,24 @@ function dropFloatingNodes() {
 }
 
 async function asyncGameLoop() {
-    let x = 0
-    while(x < 15) {
+    while(gameState === 0) {
         await asyncPlayerMove()
         let deleteCount = removeMatchesFromBoard()
         if(deleteCount > 0) {
-            // await dropFloatingNodes()
+           dropFloatingNodes()
+           countCapitalsOnBoardModel()
+           if(virusCount === 0) {
+               gameState = 1
+               console.log('game over')
+           }
         } else {
             console.log('nothing to delete')
         }
         spawnPlayerPill()
-        x++
         render()
     }
     playerPill = null
+    gameState = -1
     console.log('game over')
 }
 
@@ -484,8 +487,8 @@ function countCapitalsOnBoardModel() {
         boardAsString += r
     }
     let searchResults = [...boardAsString.matchAll(searchRegExp)]
-    // In the game this will update the remaining viruses
-    console.log('Remaining Capitals', searchResults.length)
+    virusCount = searchResults.length
+    console.log(virusCount)
 }
 
 function getPositionObj(row, col) { return { row: row, col: col } }
@@ -586,3 +589,4 @@ function getBoardColumnsAs2DArray() {
 
 /* -------------------------------  Main  -------------------------------- */
 init()
+asyncGameLoop()
