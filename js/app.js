@@ -87,12 +87,6 @@ class PlayerPill {
         )
     }
 
-    lastRowCheck() {
-        if (nextPosition.row === TOTAL_ROWS) {
-            console.log(this, "On the last row!")
-        }
-    }
-
     placePlayerPillOnBoardModel() { this.nodes.forEach(n => addNodeToBoardModel(n)) }
 
     removePlayerPillFromBoardModel() { this.nodes.forEach(n => removeNodeFromBoardModel(n)) }
@@ -239,8 +233,7 @@ function init() {
     virusCount = 18;
     initVirusesOnBoardModel()
     // * dont reset the score
-    // spawnPlayerPill()
-
+    spawnPlayerPill()
     render()
 }
 
@@ -336,6 +329,8 @@ function spawnPlayerPill() {
     playerPill.placePlayerPillOnBoardModel()
 }
 
+
+
 /* -------------------------------  Helpers  -------------------------------- */
 function addNodeToBoardModel(node) { boardModel[node.position.row][node.position.col] = node }
 
@@ -345,6 +340,13 @@ function clampNum(num, min, max) {
     if (num > max) { return max }
     if (num < min) { return min }
     return num
+}
+
+function addPositions(posObjA, posObjB) {
+    return {
+        row: posObjA.row + posObjB.row,
+        col: posObjA.col + posObjB.col
+    }
 }
 
 function getNodeFromBoardModelAt(positionObj) { return boardModel[positionObj.row][positionObj.col] }
@@ -366,21 +368,91 @@ function isGameOver() {
             getNodeFromBoardModelAt(SPAWN_POSITION_B) !== '-' ) ? true : false 
 }
 
+// This function will just handle 1 pass of the drop
+function dropFloatingNodes() {
+    let movedANode = true
+    // ONce nothing is moved, there are no more legal floating nodes to move
+    while(movedANode) {
+        let currentRowIndex = TOTAL_ROWS - 2 // (start on the second to last row)
+        movedANode = false
+        // let interval = setInterval(()=> {
+
+        // })
+        while(currentRowIndex > -1) {
+            let row = boardModel[currentRowIndex]
+            let nodes = []
+            row.forEach(square => {
+                if(square !== '-') {
+                    nodes.push(square)
+                }
+            })
+        
+            // Step 2 filter for floating nodwes
+            let floatingNodes = nodes.filter((node) => {
+                // Node is a virus, ignore it.
+                if(VIRUS_COLORS.includes(node.color)) {
+                    return false
+                }
+        
+                // space below is not empty, can't move down
+                let target = addPositions(node.position, BOTTOM)
+                if(getNodeFromBoardModelAt(target) !== '-') {
+                    return false
+                }
+        
+                // sibling is null
+                // or siblin is vertical
+                // or sibling is not vertical and has an empty space below it
+        
+                // If the node has a sibling
+                if(node.sibling !== null) {
+                    // and the sibling is on the same row
+                    if (node.sibling.position.row === node.position.row) {
+                        // and the sibling has a free space below it
+                        let siblingTarget = addPositions(node.sibling.position, BOTTOM)
+                        if(getNodeFromBoardModelAt(siblingTarget) === '-') {
+                            return true // this is a valid node to move
+                        }
+                        return false // the sibling is blocked from falling, invalid node
+                    }
+                    // The sibling is above the node so it will fall with it.
+                    return true // valid node
+                }
+        
+                // No sibling and passes all other tests
+                return true
+            })
+        
+            // step 3
+            // move all the nodes down 1 space
+            if(floatingNodes.length > 0) {
+                movedANode = true
+                floatingNodes.forEach(node => {
+                    removeNodeFromBoardModel(node)
+                    node.position = addPositions(node.position, BOTTOM)
+                    addNodeToBoardModel(node)
+                })
+            }
+            console.log(currentRowIndex, movedANode)
+            currentRowIndex--;
+        }
+        render()
+    }
+}
 
 async function asyncGameLoop() {
-    spawnPlayerPill()
-    render()
     let x = 0
-    while(x < 10) {
+    while(x < 15) {
         await asyncPlayerMove()
         let deleteCount = removeMatchesFromBoard()
         if(deleteCount > 0) {
-            console.log('delete pills')
+            // await dropFloatingNodes()
         } else {
             console.log('nothing to delete')
         }
         spawnPlayerPill()
         x++
+        render()
     }
     playerPill = null
     console.log('game over')
