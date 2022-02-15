@@ -239,7 +239,7 @@ function init() {
     virusCount = 18;
     initVirusesOnBoardModel()
     // * dont reset the score
-    spawnPlayerPill()
+    // spawnPlayerPill()
 
     render()
 }
@@ -367,37 +367,36 @@ function isGameOver() {
 }
 
 
-// ! ---- BUG 
-// TODO: fix bug that skips the first pill positions render.
-function runGameLoop() {
-
-    let gameLoop = setInterval(() => {
-        // move the pill
-        let moveResult = playerPill.move(BOTTOM)
-        if(moveResult === false) {
-
-            // Wait for...
-            // 1 check for connections
-            // 2 clear connections (remember to decouple)
-            removeMatchesFromBoard()
-            // 3 drop floating nodes
-            // Repeat 1 - 3 until there are no more connections
-
-            // Then
-            // Spawn a new pill
-            if(isGameOver()) {
-                playerPill = null
-                clearInterval(gameLoop)
-                console.log('game over')
-                // render game over screen
-            } else {
-                spawnPlayerPill()
-            }
-            
+async function asyncGameLoop() {
+    spawnPlayerPill()
+    render()
+    let x = 0
+    while(x < 10) {
+        await asyncPlayerMove()
+        let deleteCount = removeMatchesFromBoard()
+        if(deleteCount > 0) {
+            console.log('delete pills')
+        } else {
+            console.log('nothing to delete')
         }
-        render()
-    }, gameSpeed)
+        spawnPlayerPill()
+        x++
+    }
+    playerPill = null
+    console.log('game over')
+}
 
+function asyncPlayerMove() {
+    return new Promise((resolve, reject) => {
+        let playerMove = setInterval(() => {
+            let moveResult = playerPill.move(BOTTOM)
+            if(moveResult === false) {
+                clearInterval(playerMove)
+                resolve('move done')
+            }
+            render()
+        }, gameSpeed)
+    })
 }
 
 function countCapitalsOnBoardModel() {
@@ -447,6 +446,7 @@ function getAllMatchingPositionsOnBoardCol(array2D) {
     return matchingPositions
 }
 
+// Returns 1 if anything was deleted, -1 if nothing was deleted
 function removeMatchesFromBoard() {
     // find all the matches
     let boardAsColumns = getBoardColumnsAs2DArray()
@@ -454,20 +454,22 @@ function removeMatchesFromBoard() {
     let matchingPositionsInCols = getAllMatchingPositionsOnBoardCol(boardAsColumns)
     let allMatchingPositions = matchingPositionsInRows.concat(matchingPositionsInCols)
 
-    let uniqueMatches = new Set()
-    allMatchingPositions.forEach(position => uniqueMatches.add(getNodeFromBoardModelAt(position)))
-    console.log(uniqueMatches)
-
-    uniqueMatches.forEach(node => {
-        console.log('removing',node)
-        if(node.sibling !== null) {
-            decouplePillNodes(node)
-        }
-        removeNodeFromBoardModel(node)
-        console.log('Success!')
-    })
-    console.log(boardModel)
-    console.log(countCapitalsOnBoardModel())
+    if(allMatchingPositions.length > 0) {
+        let uniqueMatches = new Set()
+        allMatchingPositions.forEach(position => uniqueMatches.add(getNodeFromBoardModelAt(position)))
+        console.log(uniqueMatches)
+    
+        uniqueMatches.forEach(node => {
+            console.log('removing',node)
+            if(node.sibling !== null) {
+                decouplePillNodes(node)
+            }
+            removeNodeFromBoardModel(node)
+            console.log('Success!')
+        })
+        return 1
+    }
+    return -1
 }
 
 // Search the array for repeating characters
