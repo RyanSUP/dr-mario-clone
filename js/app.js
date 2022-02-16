@@ -8,6 +8,10 @@
 
 /* -------------------------------  CACHED REFERENCES  -------------------------------- */
 const boardContainer = document.querySelector('.board-container')
+const boardOverlay = document.querySelector('.board-overlay')
+const startButton = document.querySelector('.start-btn')
+const message = document.querySelector('.message')
+
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
 const TOTAL_ROWS = 16
 const TOTAL_COLS = 8
@@ -224,6 +228,14 @@ function handleKeyPress(evt) {
     }
 }
 
+startButton.addEventListener('click', evt => {
+    message.textContent = ''
+    startButton.style.visibility = 'hidden'
+    setOverlayOpacity(0)
+    init()
+    asyncGameLoop()
+})
+
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
 function init() {
     // Create the HTML (View) board
@@ -382,20 +394,14 @@ async function asyncGameLoop() {
                 updating = await test()
             }
             deleteCount = removeMatchesFromBoard()
-        }// nodes are deleted
-        // let deleteCount = removeMatchesFromBoard()
-        // if(deleteCount > 0) {
-        //     let updating = true
-        //     while(updating) {
-        //         updating = await test()
-        //     }
-        // } 
+        }
         checkForBlockedSpawn()
         countCapitalsOnBoardModel()
         spawnPlayerPill()
         render()
     }
     playerPill = null
+    renderGameOverOverlay()
 }
 
 function test() {
@@ -498,7 +504,7 @@ function countCapitalsOnBoardModel() {
         boardAsString += r
     }
     let searchResults = [...boardAsString.matchAll(searchRegExp)]
-    if(searchResults === 0) {
+    if(searchResults.length === 0) {
         gameState = 1
         console.log('game over')
     }
@@ -595,8 +601,17 @@ function getBoardColumnsAs2DArray() {
     return mappedArr
 }
 
+function setOverlayOpacity(percent) {
+    boardOverlay.style.opacity = `${percent}%`
+}
 
+function renderGameOverOverlay() {
+    if(gameState === 1) {
 
-/* -------------------------------  Main  -------------------------------- */
-init()
-asyncGameLoop()
+        message.textContent = 'Winner!'
+    } else {
+        message.textContent = 'Game Over'
+    }
+    startButton.style.visibility = 'visible'
+    setOverlayOpacity(80)
+}
