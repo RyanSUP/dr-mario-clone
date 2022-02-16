@@ -39,11 +39,10 @@ let sqDivs // The boardview
 let boardModel // The board model
 let virusCount
 let playerNodes
-let level
-let difficulty
+let level = 0
 let gameSpeed = 400
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
-/* ------------------------------- 🎮 Player Nodes -------------------------------- */
+/* ------------------------------- 🎮 Player Nodes 💊 -------------------------------- */
 class PlayerNodes {
 
     constructor() {
@@ -218,6 +217,7 @@ startButton.addEventListener('click', evt => {
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
 function init() {
     gameState = 0
+    level++
     // Create the HTML (View) board 
     boardContainer.innerHTML = ''
     sqDivs = []
@@ -226,7 +226,8 @@ function init() {
     boardModel = []
     initBoardModel()
     // set starting viruses
-    virusCount = 1 
+    virusCount = (2 + level) * 4
+    virusCount = clampNum(virusCount, 12, 96)
     initVirusesOnBoardModel()
     countRemainingVirusesOnBoardModel() // this is a bandaid around the issue where viruses can spawn on eachother and alter the visible count
     virusMessage.style.visibility = 'visible'
@@ -259,7 +260,7 @@ function initBoardModel() {
 
 function initVirusesOnBoardModel() {
     for (let i = 0; i < virusCount; i++) {
-        let v = getRandomizedVirusNode(8)
+        let v = getRandomizedVirusNode(3)
         boardModel[v.position.row][v.position.col] = v
     }
 }
@@ -307,7 +308,7 @@ function hideBoardOverlay() {
     boardOverlay.style.visibility = 'hidden'
 }
 
-/* -------------------------------  Meat N Taters  -------------------------------- */
+/* ------------------------------- 🥩 Meat N Taters 🥔 -------------------------------- */
 function spawnPlayerNodes() {
     playerNodes = new PlayerNodes()
     playerNodes.placePlayerNodesOnBoardModel()
@@ -319,6 +320,7 @@ async function runGameLoop() {
             gameState = -1
         } else {
             spawnPlayerNodes()
+            increaseSpeed()
             render()
             await movePlayerPieceUntilItsBlocked()
             while(removeMatchesFromBoard() > 0 && gameState === 0) {
@@ -417,7 +419,11 @@ function removeMatchesFromBoard() {
     return -1
 }
 
-/* ------------------------------- 🦠 Node Helpers 🧫 -------------------------------- */
+function increaseSpeed() {
+    gameSpeed -= 5
+}
+
+/* ------------------------------- 🦠 Node Helpers 💊 -------------------------------- */
 function decoupleSiblings(node) {
     // Remove the node from its sibling
     node.sibling.sibling = null
@@ -427,9 +433,6 @@ function decoupleSiblings(node) {
 
 // Setting the handicap ensures viruses will never be generated above the handicap row.
 // This can be adjusted to increase difficulty
-// TODO: Increase virus count and lower handicap as levels increase
-// ! Viruses can spawn ontop of eachother and mess up the total! Need to fix!
-// ! Viruses can spawn in a matched pattern
 function getRandomizedVirusNode(handicap) {
     let randomIdx = Math.floor(Math.random() * VIRUS_COLORS.length)
     let randomRow = Math.floor(Math.random() * TOTAL_ROWS + handicap)
@@ -489,7 +492,7 @@ function countRemainingVirusesOnBoardModel() {
     virusCount = total
 }
 
-/* ------------------------------- 👷‍♂️ Misc Helpers 🚧 -------------------------------- */
+/* ------------------------------- 👷‍♂️ Misc Helpers 🏗 -------------------------------- */
 function clampNum(num, min, max) {
     if (num > max) { return max }
     if (num < min) { return min }
