@@ -42,10 +42,9 @@ const VERTICAL = 1
 const PILL_COLORS = ['r', 'y', 'b']
 const VIRUS_COLORS = ['R', 'Y', 'B']
 
-// Board stuff
-const sqDivs = [] // The boardview
-const boardModel = []; // The board model
 /* -------------------------------  Variables  -------------------------------- */
+let sqDivs // The boardview
+let boardModel // The board model
 let virusCount
 let playerPill
 let gameSpeed = 400
@@ -241,11 +240,14 @@ startButton.addEventListener('click', evt => {
 function init() {
     gameState = 0
     // Create the HTML (View) board 
+    boardContainer.innerHTML = ''
+    sqDivs = []
     initSqDivs()
     // Init board model to all nulls
+    boardModel = []
     initBoardModel()
     // set starting viruses
-    virusCount = 4
+    virusCount = 1
     initVirusesOnBoardModel()
     countCapitalsOnBoardModel() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
     // * dont reset the score
