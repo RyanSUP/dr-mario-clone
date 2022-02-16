@@ -229,6 +229,7 @@ function handleKeyPress(evt) {
 }
 
 startButton.addEventListener('click', evt => {
+    console.log('tst')
     message.textContent = ''
     startButton.style.visibility = 'hidden'
     setOverlayOpacity(0)
@@ -238,12 +239,13 @@ startButton.addEventListener('click', evt => {
 
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
 function init() {
-    // Create the HTML (View) board
+    gameState = 0
+    // Create the HTML (View) board 
     initSqDivs()
     // Init board model to all nulls
     initBoardModel()
     // set starting viruses
-    virusCount = 4;
+    virusCount = 4
     initVirusesOnBoardModel()
     countCapitalsOnBoardModel() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
     // * dont reset the score
@@ -397,7 +399,9 @@ async function asyncGameLoop() {
         }
         checkForBlockedSpawn()
         countCapitalsOnBoardModel()
-        spawnPlayerPill()
+        if(gameState === 0) {
+            spawnPlayerPill()
+        }
         render()
     }
     playerPill = null
