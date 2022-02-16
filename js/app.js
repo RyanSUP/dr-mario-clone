@@ -366,10 +366,11 @@ function logBoard() {
 }
 
 function checkForBlockedSpawn() {
-    return (getNodeFromBoardModelAt(SPAWN_POSITION_A) !== '-' || 
-            getNodeFromBoardModelAt(SPAWN_POSITION_B) !== '-' ) ? true : false 
+    if (getNodeFromBoardModelAt(SPAWN_POSITION_A) !== '-' || 
+            getNodeFromBoardModelAt(SPAWN_POSITION_B) !== '-' ) {
+                gameState = -1
+            } 
 }
-
 // This function will just handle 1 pass of the drop
 function dropFloatingNodes() {
     let movedANode = true
@@ -438,27 +439,96 @@ function dropFloatingNodes() {
         render()
     }
 }
-
 async function asyncGameLoop() {
     while(gameState === 0) {
         await asyncPlayerMove()
         let deleteCount = removeMatchesFromBoard()
         if(deleteCount > 0) {
-           dropFloatingNodes()
-           countCapitalsOnBoardModel()
-           if(virusCount === 0) {
-               gameState = 1
-               console.log('game over')
-           }
-        } else {
-            console.log('nothing to delete')
-        }
+            let updating = true
+            while(updating) {
+                updating = await test()
+            }
+        } 
+        checkForBlockedSpawn()
+        countCapitalsOnBoardModel()
         spawnPlayerPill()
         render()
     }
     playerPill = null
-    gameState = -1
-    console.log('game over')
+}
+
+function test() {
+    return new Promise((resolve, reject) => {
+        let interval = setInterval(()=> {
+            let currentRowIndex = TOTAL_ROWS - 2 // (start on the second to last row)
+            let movedANode = false
+            while(currentRowIndex > -1) {
+                let row = boardModel[currentRowIndex]
+                let nodes = []
+                row.forEach(square => {
+                    if(square !== '-') {
+                        nodes.push(square)
+                    }
+                })
+            
+                // Step 2 filter for floating nodwes
+                let floatingNodes = nodes.filter((node) => {
+                    // Node is a virus, ignore it.
+                    if(VIRUS_COLORS.includes(node.color)) {
+                        return false
+                    }
+            
+                    // space below is not empty, can't move down
+                    let target = addPositions(node.position, BOTTOM)
+                    if(getNodeFromBoardModelAt(target) !== '-') {
+                        return false
+                    }
+            
+                    // sibling is null
+                    // or siblin is vertical
+                    // or sibling is not vertical and has an empty space below it
+            
+                    // If the node has a sibling
+                    if(node.sibling !== null) {
+                        // and the sibling is on the same row
+                        if (node.sibling.position.row === node.position.row) {
+                            // and the sibling has a free space below it
+                            let siblingTarget = addPositions(node.sibling.position, BOTTOM)
+                            if(getNodeFromBoardModelAt(siblingTarget) === '-') {
+                                return true // this is a valid node to move
+                            }
+                            return false // the sibling is blocked from falling, invalid node
+                        }
+                        // The sibling is above the node so it will fall with it.
+                        return true // valid node
+                    }
+            
+                    // No sibling and passes all other tests
+                    return true
+                })
+            
+                // step 3
+                // move all the nodes down 1 space
+                if(floatingNodes.length > 0) {
+                    movedANode = true
+                    floatingNodes.forEach(node => {
+                        removeNodeFromBoardModel(node)
+                        node.position = addPositions(node.position, BOTTOM)
+                        addNodeToBoardModel(node)
+                    })
+                }
+                console.log(currentRowIndex, movedANode)
+                currentRowIndex--;
+            }
+            render()
+            if(movedANode) {
+                clearInterval(interval)
+                resolve(true)
+            } else {
+                resolve(false)
+            }
+        }, gameSpeed)
+    })
 }
 
 function asyncPlayerMove() {
@@ -467,6 +537,7 @@ function asyncPlayerMove() {
             let moveResult = playerPill.move(BOTTOM)
             if(moveResult === false) {
                 clearInterval(playerMove)
+                playerPill = null
                 resolve('move done')
             }
             render()
@@ -487,8 +558,10 @@ function countCapitalsOnBoardModel() {
         boardAsString += r
     }
     let searchResults = [...boardAsString.matchAll(searchRegExp)]
-    virusCount = searchResults.length
-    console.log(virusCount)
+    if(searchResults === 0) {
+        gameState = 1
+        console.log('game over')
+    }
 }
 
 function getPositionObj(row, col) { return { row: row, col: col } }
@@ -532,15 +605,12 @@ function removeMatchesFromBoard() {
     if(allMatchingPositions.length > 0) {
         let uniqueMatches = new Set()
         allMatchingPositions.forEach(position => uniqueMatches.add(getNodeFromBoardModelAt(position)))
-        console.log(uniqueMatches)
     
         uniqueMatches.forEach(node => {
-            console.log('removing',node)
             if(node.sibling !== null) {
                 decouplePillNodes(node)
             }
             removeNodeFromBoardModel(node)
-            console.log('Success!')
         })
         return 1
     }
@@ -589,4 +659,4 @@ function getBoardColumnsAs2DArray() {
 
 /* -------------------------------  Main  -------------------------------- */
 init()
-asyncGameLoop()
+//asyncGameLoop()
