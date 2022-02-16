@@ -1,11 +1,3 @@
-/**
- * Definitions:
- * Node - an object that takes a single space on the board. This could be a pillNode or a virus.
- * Pill - 2 pillNodes that are linked to each other
- * hinge Node - Image a 2x2 box around a 1x2 pill, the hinge node is the bottom left corner of that box and all rotations pivot around it. That is the magique behind rotating.
- */
-
-
 /* -------------------------------  CACHED REFERENCES  -------------------------------- */
 const boardContainer = document.querySelector('.board-container')
 const boardOverlay = document.querySelector('.board-overlay')
@@ -47,6 +39,8 @@ let sqDivs // The boardview
 let boardModel // The board model
 let virusCount
 let playerPill
+let level
+let difficulty
 let gameSpeed = 400
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
 /* ------------------------------- 🎮 Player Pill 💊 -------------------------------- */
@@ -233,7 +227,7 @@ startButton.addEventListener('click', evt => {
     startButton.style.visibility = 'hidden'
     setOverlayOpacity(0)
     init()
-    asyncGameLoop()
+    runGameLoop()
 })
 
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
@@ -247,11 +241,10 @@ function init() {
     boardModel = []
     initBoardModel()
     // set starting viruses
-    virusCount = 3
+    virusCount = 3 
     initVirusesOnBoardModel()
-    countCapitalsOnBoardModel() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
+    countRemainingVirusesOnBoard() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
     // * dont reset the score
-    spawnPlayerPill()
     render()
 }
 
@@ -346,6 +339,7 @@ function getRandomizedVirusNode(handicap) {
 function spawnPlayerPill() {
     playerPill = new PlayerPill()
     playerPill.placePlayerPillOnBoardModel()
+    render() // show new pill on board
 }
 
 
@@ -389,29 +383,41 @@ function checkForBlockedSpawn() {
             } 
 }
 
-async function asyncGameLoop() {
+function checkGameState() {
+    // Win condition
+    if(virusCount === 0) {
+        gameState = 1
+    }
+    // Lose condition
+    if (
+        getNodeFromBoardModelAt(SPAWN_POSITION_A) !== '-' || 
+        getNodeFromBoardModelAt(SPAWN_POSITION_B) !== '-' 
+    ) {
+        gameState = -1
+    } 
+}
+
+async function runGameLoop() {
     while(gameState === 0) {
-        await asyncPlayerMove()
-        let deleteCount = removeMatchesFromBoard()
-        while(deleteCount > 0) {
-            let updating = true
-            while(updating) {
-                updating = await test()
+        spawnPlayerPill()
+        await movePlayerPieceUntilItsBlocked()
+        while(removeMatchesFromBoard() > 0) {
+            let nodesAreFalling = true
+            while(nodesAreFalling) {
+                nodesAreFalling = await moveAllFloatingNodesDownUntilBlocked()
             }
-            deleteCount = removeMatchesFromBoard()
+            countRemainingVirusesOnBoard()
         }
-        checkForBlockedSpawn()
-        countCapitalsOnBoardModel()
-        if(gameState === 0) {
-            spawnPlayerPill()
-        }
+        checkGameState()
         render()
     }
+    // Game is over
     playerPill = null
     renderGameOverOverlay()
 }
 
-function test() {
+// ! Braek this function into smaller ones
+function moveAllFloatingNodesDownUntilBlocked() {
     return new Promise((resolve, reject) => {
         let interval = setInterval(()=> {
             let currentRowIndex = TOTAL_ROWS - 2 // (start on the second to last row)
@@ -484,7 +490,7 @@ function test() {
     })
 }
 
-function asyncPlayerMove() {
+function movePlayerPieceUntilItsBlocked() {
     return new Promise((resolve, reject) => {
         let playerMove = setInterval(() => {
             let moveResult = playerPill.move(BOTTOM)
@@ -498,7 +504,7 @@ function asyncPlayerMove() {
     })
 }
 
-function countCapitalsOnBoardModel() {
+function countRemainingVirusesOnBoard() {
     const searchRegExp = RegExp('Y|R|B', 'g');
     let boardAsString = ''
     for(let row of boardModel) {
@@ -511,10 +517,6 @@ function countCapitalsOnBoardModel() {
         boardAsString += r
     }
     let searchResults = [...boardAsString.matchAll(searchRegExp)]
-    if(searchResults.length === 0) {
-        gameState = 1
-        console.log('game over')
-    }
     virusCount = searchResults.length
 }
 
@@ -522,11 +524,13 @@ function getPositionObj(row, col) { return { row: row, col: col } }
 
 /* -------------------------------  Finding Matches  ----------------------*/
 
-function getAllMatchingPositionsOnBoard(array2D) {
+
+// ! Refactor positions inrow and incol as 1
+function getAllMatchingPositionsInRows() {
     let matchingPositions = []
     // For each array in the 2d array, get character matches
-    for(let i = 0; i < array2D.length; i++) {
-        let indexOfMatches = getIndexesOfMatchingNodesFromArray(array2D[i])
+    for(let i = 0; i < boardModel.length; i++) {
+        let indexOfMatches = getIndexesOfMatchingNodesFromArray(boardModel[i])
         indexOfMatches.forEach(matchIdx => {
             // Convert matches into a position object
             matchingPositions.push(getPositionObj(i,matchIdx))
@@ -535,11 +539,12 @@ function getAllMatchingPositionsOnBoard(array2D) {
     return matchingPositions
 }
 
-function getAllMatchingPositionsOnBoardCol(array2D) {
+function getAllMatchingPositionsInCols() {
+    let boardModelAsColumns = getBoardColumnsAs2DArray()
     let matchingPositions = []
     // For each array in the 2d array, get character matches
-    for(let i = 0; i < array2D.length; i++) {
-        let indexOfMatches = getIndexesOfMatchingNodesFromArray(array2D[i])
+    for(let i = 0; i < boardModelAsColumns.length; i++) {
+        let indexOfMatches = getIndexesOfMatchingNodesFromArray(boardModelAsColumns[i])
         indexOfMatches.forEach(matchIdx => {
             // Convert matches into a position object
             matchingPositions.push(getPositionObj(matchIdx,i))
@@ -551,9 +556,8 @@ function getAllMatchingPositionsOnBoardCol(array2D) {
 // Returns 1 if anything was deleted, -1 if nothing was deleted
 function removeMatchesFromBoard() {
     // find all the matches
-    let boardAsColumns = getBoardColumnsAs2DArray()
-    let matchingPositionsInRows = getAllMatchingPositionsOnBoard(boardModel)
-    let matchingPositionsInCols = getAllMatchingPositionsOnBoardCol(boardAsColumns)
+    let matchingPositionsInRows = getAllMatchingPositionsInRows()
+    let matchingPositionsInCols = getAllMatchingPositionsInCols()
     let allMatchingPositions = matchingPositionsInRows.concat(matchingPositionsInCols)
 
     if(allMatchingPositions.length > 0) {
