@@ -241,7 +241,7 @@ function init() {
     boardModel = []
     initBoardModel()
     // set starting viruses
-    virusCount = 3 
+    virusCount = 1 
     initVirusesOnBoardModel()
     countRemainingVirusesOnBoard() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
     // * dont reset the score
@@ -395,14 +395,14 @@ async function runGameLoop() {
             spawnPlayerPill()
             await movePlayerPieceUntilItsBlocked()
             while(removeMatchesFromBoard() > 0 && gameState === 0) {
-                let nodesAreFalling = true
-                while(nodesAreFalling) {
-                    nodesAreFalling = await moveAllFloatingNodesDownUntilBlocked()
-                }
                 countRemainingVirusesOnBoard()
                 if(virusCount === 0) {
                     gameState = 1
                     break;
+                }
+                let nodesAreFalling = true
+                while(nodesAreFalling) {
+                    nodesAreFalling = await moveAllFloatingNodesDownUntilBlocked()
                 }
             }
         }
@@ -502,19 +502,16 @@ function movePlayerPieceUntilItsBlocked() {
 }
 
 function countRemainingVirusesOnBoard() {
-    const searchRegExp = RegExp('Y|R|B', 'g');
-    let boardAsString = ''
+    let total = 0
     for(let row of boardModel) {
-        let r = ''
         for(let col of row) {
-            if(col !== '-') {
-                r += col.color
+            if(VIRUS_COLORS.includes(col.color)) {
+                total++
             }
         }
-        boardAsString += r
     }
-    let searchResults = [...boardAsString.matchAll(searchRegExp)]
-    virusCount = searchResults.length
+    virusCount = total
+    console.log(total)
 }
 
 function getPositionObj(row, col) { return { row: row, col: col } }
