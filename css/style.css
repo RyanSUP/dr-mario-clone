@@ -122,8 +122,9 @@ h1 {
     background-color: rgb(116, 116, 255);
 }
 
-.virus-message {
-    text-align: right;
-    visibility: hidden;
+.info {
+    height: 40px;
+    display: flex;
+    justify-content:  space-around;
     font-size: 1.2rem;
 }
