@@ -224,7 +224,6 @@ function handleKeyPress(evt) {
 }
 // TODO: REFACTOR
 startButton.addEventListener('click', evt => {
-    console.log('tst')
     message.textContent = ''
     startButton.style.visibility = 'hidden'
     
@@ -469,6 +468,7 @@ function getRandomizedVirusNode(handicap) {
     return {
         color: VIRUS_COLORS[randomIdx],
         position: { row: randomRow, col: randomCol },
+        sibling: null
     }
 }
 // TODO: move - node
