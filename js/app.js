@@ -11,7 +11,7 @@ const boardContainer = document.querySelector('.board-container')
 const boardOverlay = document.querySelector('.board-overlay')
 const startButton = document.querySelector('.start-btn')
 const message = document.querySelector('.message')
-
+const virusMessage = document.querySelector('.virus-message')
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
 const TOTAL_ROWS = 16
 const TOTAL_COLS = 8
@@ -247,7 +247,7 @@ function init() {
     boardModel = []
     initBoardModel()
     // set starting viruses
-    virusCount = 1
+    virusCount = 3
     initVirusesOnBoardModel()
     countCapitalsOnBoardModel() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
     // * dont reset the score
@@ -295,6 +295,7 @@ function render() {
     renderBoard()
     // render score
     // render message
+    renderVirusMessage()
     // render win screen
     // render lose screen
     // render controls
@@ -514,6 +515,7 @@ function countCapitalsOnBoardModel() {
         gameState = 1
         console.log('game over')
     }
+    virusCount = searchResults.length
 }
 
 function getPositionObj(row, col) { return { row: row, col: col } }
@@ -618,6 +620,12 @@ function renderGameOverOverlay() {
     } else {
         message.textContent = 'Game Over'
     }
+    virusMessage.style.visibility = 'hidden'
     startButton.style.visibility = 'visible'
     setOverlayOpacity(80)
+}
+
+function renderVirusMessage() {
+    virusMessage.style.visibility = 'visible'
+    virusMessage.textContent = `${virusCount} viruses left`
 }
