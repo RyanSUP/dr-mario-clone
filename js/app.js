@@ -73,7 +73,7 @@ class PlayerPill {
     }
 
     isColliding(node, position) {
-        let npNode = getNodeFromBoardModelAt(position)
+        let npNode = getNodeAtPosition(position)
         return (npNode === '-' || npNode === node.sibling) ? false : true
     }
 
@@ -95,7 +95,7 @@ class PlayerPill {
 
         // Do nothing if the move is not legal
         for (let n of this.nodes) {
-            let targetPosition = this.addPositions(n.position, positionOffset)
+            let targetPosition = this.getAddedPositions(n.position, positionOffset)
             // Prevent player from going off the board
             if (!this.isInBounds(targetPosition)) {
                 return false
@@ -108,7 +108,7 @@ class PlayerPill {
         }
         // If the move is legal, updates the positon
         this.updatePillPosition(() => {
-            this.nodes.forEach(n => n.position = this.addPositions(n.position, positionOffset))
+            this.nodes.forEach(n => n.position = this.getAddedPositions(n.position, positionOffset))
         })
         return true
     }
@@ -123,11 +123,11 @@ class PlayerPill {
 
     // If the player rotates the pill while vertical and blocked on the right side, shift the pill 1 space to the left and carry out rotation
     handleBlockedRotation(direction) {
-        let positionRightOfHinge = this.addPositions(this.nodes[0].position, RIGHT)
-        let positionLeftOfHinge = this.addPositions(this.nodes[0].position, LEFT)
+        let positionRightOfHinge = this.getAddedPositions(this.nodes[0].position, RIGHT)
+        let positionLeftOfHinge = this.getAddedPositions(this.nodes[0].position, LEFT)
 
-        if (getNodeFromBoardModelAt(positionRightOfHinge) !== '-' &&
-            getNodeFromBoardModelAt(positionLeftOfHinge) === '-'
+        if (getNodeAtPosition(positionRightOfHinge) !== '-' &&
+            getNodeAtPosition(positionLeftOfHinge) === '-'
         ) {
             if (direction === CLOCKWISE) {
                 this.updatePillPosition(() => {
@@ -150,7 +150,7 @@ class PlayerPill {
     rotate(direction) {
 
         let rotationOffset = (this.orientation === HORIZONTAL) ? TOP : RIGHT
-        let rotationTargetPosition = this.addPositions(this.nodes[0].position, rotationOffset)
+        let rotationTargetPosition = this.getAddedPositions(this.nodes[0].position, rotationOffset)
 
         // Prevent player from moving into another node
         if (this.isColliding(this.nodes[0], rotationTargetPosition)) {
@@ -169,7 +169,7 @@ class PlayerPill {
                 // change the hinge node
                 this.nodes.reverse()
             } else {
-                this.nodes[1].position = this.addPositions(this.nodes[1].position, BOTTOM_RIGHT)
+                this.nodes[1].position = this.getAddedPositions(this.nodes[1].position, BOTTOM_RIGHT)
             }
             this.updateOrientation()
         })
@@ -178,7 +178,7 @@ class PlayerPill {
     rotateCounterClockwise(rotationTargetPosition) {
         this.updatePillPosition(() => {
             if (this.orientation === HORIZONTAL) {
-                this.nodes[1].position = this.addPositions(this.nodes[1].position, TOP_LEFT)
+                this.nodes[1].position = this.getAddedPositions(this.nodes[1].position, TOP_LEFT)
             } else {
                 this.nodes[1].position = this.nodes[0].position
                 this.nodes[0].position = rotationTargetPosition
@@ -189,7 +189,7 @@ class PlayerPill {
         })
     }
 
-    addPositions(posObjA, posObjB) {
+    getAddedPositions(posObjA, posObjB) {
         return {
             row: posObjA.row + posObjB.row,
             col: posObjA.col + posObjB.col
@@ -247,7 +247,7 @@ function init() {
     // set starting viruses
     virusCount = 1 
     initVirusesOnBoardModel()
-    countRemainingVirusesOnBoard() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
+    countRemainingVirusesOnBoardModel() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
     virusMessage.style.visibility = 'visible'
     // * dont reset the score
     render()
@@ -315,85 +315,36 @@ function renderBoard() {
     }
 }
 
-/* ------------------------------- 🦠 Node / Pill / Virus Functions 🧫 -------------------------------- */
-// TODO: REFACTOR
-function decouplePillNodes(node) {
-    // Remove the node from its sibling
-    node.sibling.sibling = null
-    // Then remove the sibling from node
-    node.sibling = null
+// TODO: MOVE - render
+function renderGameOverOverlay() {
+    virusMessage.style.visibility = 'hidden'
+    startButton.style.visibility = 'visible'
+    setOverlayOpacity(80)
 }
-// TODO: REFACTOR
-// Setting the handicap ensures viruses will never be generated above the handicap row.
-// This can be adjusted to increase difficulty
-// TODO: Increase virus count and lower handicap as levels increase
-// ! Viruses can spawn ontop of eachother and mess up the total! Need to fix!
-// ! Viruses can spawn in a matched pattern
-function getRandomizedVirusNode(handicap) {
-    // get random color. 
-    // PILL_COLORS and VIRUS_COLORS will always be the same length, so it doesn't matter which I choose here.
-    let randomIdx = Math.floor(Math.random() * VIRUS_COLORS.length)
-    let randomRow = Math.floor(Math.random() * TOTAL_ROWS + handicap)
-    randomRow = clampNum(randomRow, handicap, 15)
-    let randomCol = Math.floor(Math.random() * TOTAL_COLS)
+// TODO MOVE - render
+function renderVirusCount() {
+    virusMessage.textContent = `${virusCount} viruses left`
+}
 
-    return {
-        color: VIRUS_COLORS[randomIdx],
-        position: { row: randomRow, col: randomCol },
-        sibling: null // Virus will never have a sibling, but I'll keep this property for now.
-    }
-}
-// TODO: REFACTOR
+
+
+/* -------------------------------  Meat N Taters  -------------------------------- */
 function spawnPlayerPill() {
     playerPill = new PlayerPill()
     playerPill.placePlayerPillOnBoardModel()
-    render() // show new pill on board
 }
 
-
-
-/* -------------------------------  Helpers  -------------------------------- */
-// TODO: REFACTOR
-function addNodeToBoardModel(node) { boardModel[node.position.row][node.position.col] = node }
-// TODO: REFACTOR
-function removeNodeFromBoardModel(node) { boardModel[node.position.row][node.position.col] = '-' }
-// TODO: REFACTOR
-function clampNum(num, min, max) {
-    if (num > max) { return max }
-    if (num < min) { return min }
-    return num
-}
-// TODO: REFACTOR
-function addPositions(posObjA, posObjB) {
-    return {
-        row: posObjA.row + posObjB.row,
-        col: posObjA.col + posObjB.col
-    }
-}
-// TODO: REFACTOR
-function getNodeFromBoardModelAt(positionObj) { return boardModel[positionObj.row][positionObj.col] }
-
-// TODO: REFACTOR
-function isSpawnPositionBlocked() {
-    if (
-        getNodeFromBoardModelAt(SPAWN_POSITION_A) !== '-' || 
-        getNodeFromBoardModelAt(SPAWN_POSITION_B) !== '-' 
-    ) {
-        return true
-    }
-    return false
-}
-
-// TODO: REFACTOR
+// TODO: Move - meat n taters
 async function runGameLoop() {
     while(gameState === 0) {
         if(isSpawnPositionBlocked()) {
             gameState = -1
         } else {
             spawnPlayerPill()
+            render()
             await movePlayerPieceUntilItsBlocked()
             while(removeMatchesFromBoard() > 0 && gameState === 0) {
-                countRemainingVirusesOnBoard()
+                countRemainingVirusesOnBoardModel()
                 if(virusCount === 0) {
                     gameState = 1
                     break;
@@ -410,65 +361,34 @@ async function runGameLoop() {
     playerPill = null
     renderGameOverOverlay()
 }
-// TODO: REFACTOR
-// ! Braek this function into smaller ones
+
+// TODO: Move - meat n taters
+// This function runs from the entire boardModel ONE TIME and updates the floating nodes in each row.
 function moveAllFloatingNodesDownUntilBlocked() {
     return new Promise((resolve, reject) => {
         let interval = setInterval(()=> {
-            let currentRowIndex = TOTAL_ROWS - 2 // (start on the second to last row)
+            // (start on the second to last row)
+            let currentRowIndex = TOTAL_ROWS - 2 
             let movedANode = false
             while(currentRowIndex > -1) {
+                // Get all the nodes on the row
                 let row = boardModel[currentRowIndex]
-                let nodes = []
+                let nodesInCurrentRow = []
                 row.forEach(square => {
                     if(square !== '-') {
-                        nodes.push(square)
+                        nodesInCurrentRow.push(square)
                     }
                 })
             
-                // Step 2 filter for floating nodwes
-                let floatingNodes = nodes.filter((node) => {
-                    // Node is a virus, ignore it.
-                    if(VIRUS_COLORS.includes(node.color)) {
-                        return false
-                    }
+                // Filter for floating nodes
+                let floatingNodes = getFloatingNodes(nodesInCurrentRow)
             
-                    // space below is not empty, can't move down
-                    let target = addPositions(node.position, BOTTOM)
-                    if(getNodeFromBoardModelAt(target) !== '-') {
-                        return false
-                    }
-            
-                    // sibling is null
-                    // or siblin is vertical
-                    // or sibling is not vertical and has an empty space below it
-            
-                    // If the node has a sibling
-                    if(node.sibling !== null) {
-                        // and the sibling is on the same row
-                        if (node.sibling.position.row === node.position.row) {
-                            // and the sibling has a free space below it
-                            let siblingTarget = addPositions(node.sibling.position, BOTTOM)
-                            if(getNodeFromBoardModelAt(siblingTarget) === '-') {
-                                return true // this is a valid node to move
-                            }
-                            return false // the sibling is blocked from falling, invalid node
-                        }
-                        // The sibling is above the node so it will fall with it.
-                        return true // valid node
-                    }
-            
-                    // No sibling and passes all other tests
-                    return true
-                })
-            
-                // step 3
-                // move all the nodes down 1 space
+                // Move all the floating nodes down 1 space
                 if(floatingNodes.length > 0) {
                     movedANode = true
                     floatingNodes.forEach(node => {
                         removeNodeFromBoardModel(node)
-                        node.position = addPositions(node.position, BOTTOM)
+                        node.position = getAddedPositions(node.position, BOTTOM)
                         addNodeToBoardModel(node)
                     })
                 }
@@ -484,23 +404,113 @@ function moveAllFloatingNodesDownUntilBlocked() {
         }, gameSpeed)
     })
 }
-// TODO: REFACTOR
+
+// TODO: Move - Meat and taters
 function movePlayerPieceUntilItsBlocked() {
     return new Promise((resolve, reject) => {
         let playerMove = setInterval(() => {
             let moveResult = playerPill.move(BOTTOM)
             if(moveResult === false) {
                 clearInterval(playerMove)
+                // Setting playerPill to null here prevents players from moving pieces while falling nodes resolve.
                 playerPill = null
-                resolve('move done')
+                resolve()
             }
             render()
         }, gameSpeed)
     })
 }
 
-// TODO: REFACTOR done
-function countRemainingVirusesOnBoard() {
+// TODO: Move - meat and taters
+// Returns 1 if anything was deleted, -1 if nothing was deleted
+function removeMatchesFromBoard() {
+    // find all the matches
+    let rowMatches = getArrayOfMatchingPositionsFromRows()
+    let colMatches = getArrayOfMatchingPositionsFromColumns()
+    let allMatchingPositions = rowMatches.concat(colMatches)
+
+    if(allMatchingPositions.length > 0) {
+        let uniqueMatches = new Set()
+        allMatchingPositions.forEach(position => uniqueMatches.add(getNodeAtPosition(position)))
+    
+        uniqueMatches.forEach(node => {
+            if(node.sibling !== null) {
+                decoupleSiblings(node)
+            }
+            removeNodeFromBoardModel(node)
+        })
+        // Matches found 
+        return 1
+    }
+    // No matches found
+    return -1
+}
+
+/* ------------------------------- 🦠 Node Functions 🧫 -------------------------------- */
+// TODO: REFACTOR
+function decoupleSiblings(node) {
+    // Remove the node from its sibling
+    node.sibling.sibling = null
+    // Then remove the sibling from node
+    node.sibling = null
+}
+// TODO: REFACTOR
+// Setting the handicap ensures viruses will never be generated above the handicap row.
+// This can be adjusted to increase difficulty
+// TODO: Increase virus count and lower handicap as levels increase
+// ! Viruses can spawn ontop of eachother and mess up the total! Need to fix!
+// ! Viruses can spawn in a matched pattern
+function getRandomizedVirusNode(handicap) {
+    let randomIdx = Math.floor(Math.random() * VIRUS_COLORS.length)
+    let randomRow = Math.floor(Math.random() * TOTAL_ROWS + handicap)
+    randomRow = clampNum(randomRow, handicap, 15)
+    let randomCol = Math.floor(Math.random() * TOTAL_COLS)
+
+    return {
+        color: VIRUS_COLORS[randomIdx],
+        position: { row: randomRow, col: randomCol },
+    }
+}
+// TODO: move - node
+function addNodeToBoardModel(node) { boardModel[node.position.row][node.position.col] = node }
+// TODO: move - node 
+function removeNodeFromBoardModel(node) { boardModel[node.position.row][node.position.col] = '-' }
+
+// Todo: move - Nodes
+function getFloatingNodes(nodeArray) {
+    let floatingNodes = nodeArray.filter((node) => {
+        // Node is a virus, ignore it.
+        if(VIRUS_COLORS.includes(node.color)) {
+            return false
+        }
+
+        // space below is not empty, can't move down
+        let target = getAddedPositions(node.position, BOTTOM)
+        if(getNodeAtPosition(target) !== '-') {
+            return false
+        }
+
+        // If the node has a sibling
+        if(node.sibling !== null) {
+            // and the sibling is on the same row
+            if (node.sibling.position.row === node.position.row) {
+                // and the sibling has a free space below it
+                let siblingTarget = getAddedPositions(node.sibling.position, BOTTOM)
+                if(getNodeAtPosition(siblingTarget) === '-') {
+                    return true // this is a valid node to move
+                }
+                return false // the sibling is blocked from falling, invalid node
+            }
+            // The sibling is above the node so it will fall with it.
+            return true // valid node
+        }
+        // No sibling and passes all other tests. Valid node
+        return true
+    })
+    return floatingNodes
+}
+// TODO: move - Nodes
+function countRemainingVirusesOnBoardModel() {
     let total = 0
     for(let row of boardModel) {
         for(let col of row) {
@@ -511,65 +521,75 @@ function countRemainingVirusesOnBoard() {
     }
     virusCount = total
 }
+/* -------------------------------  Misc Helpers  -------------------------------- */
 
-// TODO: REFACTOR
-function getPositionObj(row, col) { return { row: row, col: col } }
+// TODO: move - helper
+function clampNum(num, min, max) {
+    if (num > max) { return max }
+    if (num < min) { return min }
+    return num
+}
+// TODO: move - helper
+function getAddedPositions(posObjA, posObjB) {
+    return {
+        row: posObjA.row + posObjB.row,
+        col: posObjA.col + posObjB.col
+    }
+}
+// TODO: move - helper
+function getNodeAtPosition(positionObj) { return boardModel[positionObj.row][positionObj.col] }
 
-/* -------------------------------  Finding Matches  ----------------------*/
+// TODO: move - helper
+function isSpawnPositionBlocked() {
+    if (
+        getNodeAtPosition(SPAWN_POSITION_A) !== '-' || 
+        getNodeAtPosition(SPAWN_POSITION_B) !== '-' 
+    ) {
+        return true
+    }
+    return false
+}
 
 
-// ! Refactor positions inrow and incol as 1
-// TODO: REFACTOR
-function getAllMatchingPositionsInRows() {
+
+// TODO: Move - helper
+function createPositionObj(row, col) { return { row: row, col: col } }
+
+
+// TODO: Move - helper
+function getArrayOfMatchingPositionsFromRows() {
     let matchingPositions = []
-    // For each array in the 2d array, get character matches
+    // Look for matches in each row of the model
     for(let i = 0; i < boardModel.length; i++) {
         let indexOfMatches = getIndexesOfRepeatingCharacters(boardModel[i])
         indexOfMatches.forEach(matchIdx => {
             // Convert matches into a position object
-            matchingPositions.push(getPositionObj(i,matchIdx))
+            matchingPositions.push(createPositionObj(i,matchIdx))
         })
     }
-    return matchingPositions
+    return matchingPositions // {row: #, col: #}
 }
-// TODO: REFACTOR
-function getAllMatchingPositionsInCols() {
-    let boardModelAsColumns = getBoardColumnsAs2DArray()
+
+// TODO: Move - helper
+function getArrayOfMatchingPositionsFromColumns() {
+    // Rotating the board model puts the columns of the original board into a row array which is easier to work with.
+    let rotatedBoardModel = getRotatedBoardModel()
     let matchingPositions = []
-    // For each array in the 2d array, get character matches
-    for(let i = 0; i < boardModelAsColumns.length; i++) {
-        let indexOfMatches = getIndexesOfRepeatingCharacters(boardModelAsColumns[i])
+    // Look for matches in each row of the model
+    for(let i = 0; i < rotatedBoardModel.length; i++) {
+        let indexOfMatches = getIndexesOfRepeatingCharacters(rotatedBoardModel[i])
         indexOfMatches.forEach(matchIdx => {
             // Convert matches into a position object
-            matchingPositions.push(getPositionObj(matchIdx,i))
+            // Note rows and columns are swapped in createPositionObj, this is because this function uses a transformed boardModel
+            matchingPositions.push(createPositionObj(matchIdx,i))
         })
     }
-    return matchingPositions
+    return matchingPositions // {row: #, col: #}
 }
-// TODO: REFACTOR
-// Returns 1 if anything was deleted, -1 if nothing was deleted
-function removeMatchesFromBoard() {
-    // find all the matches
-    let matchingPositionsInRows = getAllMatchingPositionsInRows()
-    let matchingPositionsInCols = getAllMatchingPositionsInCols()
-    let allMatchingPositions = matchingPositionsInRows.concat(matchingPositionsInCols)
 
-    if(allMatchingPositions.length > 0) {
-        let uniqueMatches = new Set()
-        allMatchingPositions.forEach(position => uniqueMatches.add(getNodeFromBoardModelAt(position)))
-    
-        uniqueMatches.forEach(node => {
-            if(node.sibling !== null) {
-                decouplePillNodes(node)
-            }
-            removeNodeFromBoardModel(node)
-        })
-        return 1
-    }
-    return -1
-}
-// TODO: Move - Helper?
-// Search the array for repeating characters
+
+// TODO: Move - Helper
+// Search the array for any number of repeating characters
 function getIndexesOfRepeatingCharacters(arr) {
     let colorMap = arr.map(e => (e === '-') ? '-' : e.color)
     let colorMapString = colorMap.join('')
@@ -583,14 +603,14 @@ function getIndexesOfRepeatingCharacters(arr) {
             resultIndexes.push(startingPos + i)
         }
     }
-    // Return the indexes
+    // Return the indexes. Ok to return empty []
     return resultIndexes
-
 }
+
 // TODO: MOVE - helper
 // Flip the board sideways so I can check columns of a 2D array as if they were a single row.
 // Helpful when looking for matches.
-function getBoardColumnsAs2DArray() {
+function getRotatedBoardModel() {
     let mappedArr = []
     for(let col = 0; col < boardModel[0].length; col++) {
         let colArray = []
@@ -604,14 +624,4 @@ function getBoardColumnsAs2DArray() {
 // TODO: MOVE - helper
 function setOverlayOpacity(percent) {
     boardOverlay.style.opacity = `${percent}%`
-}
-// TODO: MOVE - render
-function renderGameOverOverlay() {
-    virusMessage.style.visibility = 'hidden'
-    startButton.style.visibility = 'visible'
-    setOverlayOpacity(80)
-}
-// TODO MOVE - render
-function renderVirusCount() {
-    virusMessage.textContent = `${virusCount} viruses left`
 }
