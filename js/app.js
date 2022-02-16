@@ -44,6 +44,7 @@ let difficulty
 let gameSpeed = 400
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
 /* ------------------------------- 🎮 Player Pill 💊 -------------------------------- */
+// TODO: REFACTOR
 class PlayerPill {
 
     constructor() {
@@ -196,8 +197,9 @@ class PlayerPill {
     }
 }
 /* ------------------------------- 🦻 Event Listeners 📡 -------------------------------- */
+// TODO: REFACTOR
 document.addEventListener('keydown', handleKeyPress);
-
+// TODO: REFACTOR
 function handleKeyPress(evt) {
     if(playerPill !== null) {
         switch (evt.code) {
@@ -220,17 +222,19 @@ function handleKeyPress(evt) {
         render()
     }
 }
-
+// TODO: REFACTOR
 startButton.addEventListener('click', evt => {
     console.log('tst')
     message.textContent = ''
     startButton.style.visibility = 'hidden'
+    
     setOverlayOpacity(0)
     init()
     runGameLoop()
 })
 
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
+// TODO: REFACTOR
 function init() {
     gameState = 0
     // Create the HTML (View) board 
@@ -244,10 +248,11 @@ function init() {
     virusCount = 1 
     initVirusesOnBoardModel()
     countRemainingVirusesOnBoard() // this is a hack around the issue where viruses can spawn on eachother and alter the visible count
+    virusMessage.style.visibility = 'visible'
     // * dont reset the score
     render()
 }
-
+// TODO: REFACTOR
 // Creates div elements and appends them to boardContainer
 // Pushes div elements into 2D sqDivs array to be used for rendering.
 // The array is 2D because the data model is and this will make it easier to translate
@@ -265,7 +270,7 @@ function initSqDivs() {
         sqDivs.push(divsInRow)
     }
 }
-
+// TODO: REFACTOR
 function initBoardModel() {
     for (let row = 0; row < TOTAL_ROWS; row++) {
         const columnsInRow = []
@@ -275,7 +280,7 @@ function initBoardModel() {
         boardModel.push(columnsInRow)
     }
 }
-
+// TODO: REFACTOR
 function initVirusesOnBoardModel() {
     for (let i = 0; i < virusCount; i++) {
         let v = getRandomizedVirusNode(8)
@@ -284,18 +289,20 @@ function initVirusesOnBoardModel() {
 }
 
 /* ------------------------------- 🖥 Render 🎁 -------------------------------- */
+// TODO: Render Score
 function render() {
-    renderBoard()
+    if(gameState === 0) {
+        renderBoard()
+        renderVirusCount()
+    } else {
+        message.textContent = (gameState === 1) ? 'Winner!' : 'Game Over'
+        renderGameOverOverlay()
+    }
     // render score
-    // render message
-    renderVirusMessage()
-    // render win screen
-    // render lose screen
-    // render controls
 }
 
 // Reset all the div.sq classes default, then add classes depending on what is at the position.
-// Reseting the class is needed to properly display movement.
+// Reseting the class is needed to reflect movement.
 function renderBoard() {
     for (let row = 0; row < TOTAL_ROWS; row++) {
         for (let col = 0; col < TOTAL_COLS; col++) {
@@ -309,13 +316,14 @@ function renderBoard() {
 }
 
 /* ------------------------------- 🦠 Node / Pill / Virus Functions 🧫 -------------------------------- */
+// TODO: REFACTOR
 function decouplePillNodes(node) {
     // Remove the node from its sibling
     node.sibling.sibling = null
     // Then remove the sibling from node
     node.sibling = null
 }
-
+// TODO: REFACTOR
 // Setting the handicap ensures viruses will never be generated above the handicap row.
 // This can be adjusted to increase difficulty
 // TODO: Increase virus count and lower handicap as levels increase
@@ -335,7 +343,7 @@ function getRandomizedVirusNode(handicap) {
         sibling: null // Virus will never have a sibling, but I'll keep this property for now.
     }
 }
-
+// TODO: REFACTOR
 function spawnPlayerPill() {
     playerPill = new PlayerPill()
     playerPill.placePlayerPillOnBoardModel()
@@ -345,37 +353,27 @@ function spawnPlayerPill() {
 
 
 /* -------------------------------  Helpers  -------------------------------- */
+// TODO: REFACTOR
 function addNodeToBoardModel(node) { boardModel[node.position.row][node.position.col] = node }
-
+// TODO: REFACTOR
 function removeNodeFromBoardModel(node) { boardModel[node.position.row][node.position.col] = '-' }
-
+// TODO: REFACTOR
 function clampNum(num, min, max) {
     if (num > max) { return max }
     if (num < min) { return min }
     return num
 }
-
+// TODO: REFACTOR
 function addPositions(posObjA, posObjB) {
     return {
         row: posObjA.row + posObjB.row,
         col: posObjA.col + posObjB.col
     }
 }
-
+// TODO: REFACTOR
 function getNodeFromBoardModelAt(positionObj) { return boardModel[positionObj.row][positionObj.col] }
 
-function logBoard() {
-    console.log('=====================')
-    boardModel.forEach(r => {
-        let str = ''
-        r.forEach(c => {
-            str += (c === '-') ? '- ' : c.color + ' '
-        })
-        console.log(str)
-    })
-    console.log('=====================')
-}
-
+// TODO: REFACTOR
 function isSpawnPositionBlocked() {
     if (
         getNodeFromBoardModelAt(SPAWN_POSITION_A) !== '-' || 
@@ -386,7 +384,7 @@ function isSpawnPositionBlocked() {
     return false
 }
 
-
+// TODO: REFACTOR
 async function runGameLoop() {
     while(gameState === 0) {
         if(isSpawnPositionBlocked()) {
@@ -412,7 +410,7 @@ async function runGameLoop() {
     playerPill = null
     renderGameOverOverlay()
 }
-
+// TODO: REFACTOR
 // ! Braek this function into smaller ones
 function moveAllFloatingNodesDownUntilBlocked() {
     return new Promise((resolve, reject) => {
@@ -486,7 +484,7 @@ function moveAllFloatingNodesDownUntilBlocked() {
         }, gameSpeed)
     })
 }
-
+// TODO: REFACTOR
 function movePlayerPieceUntilItsBlocked() {
     return new Promise((resolve, reject) => {
         let playerMove = setInterval(() => {
@@ -501,6 +499,7 @@ function movePlayerPieceUntilItsBlocked() {
     })
 }
 
+// TODO: REFACTOR done
 function countRemainingVirusesOnBoard() {
     let total = 0
     for(let row of boardModel) {
@@ -511,20 +510,21 @@ function countRemainingVirusesOnBoard() {
         }
     }
     virusCount = total
-    console.log(total)
 }
 
+// TODO: REFACTOR
 function getPositionObj(row, col) { return { row: row, col: col } }
 
 /* -------------------------------  Finding Matches  ----------------------*/
 
 
 // ! Refactor positions inrow and incol as 1
+// TODO: REFACTOR
 function getAllMatchingPositionsInRows() {
     let matchingPositions = []
     // For each array in the 2d array, get character matches
     for(let i = 0; i < boardModel.length; i++) {
-        let indexOfMatches = getIndexesOfMatchingNodesFromArray(boardModel[i])
+        let indexOfMatches = getIndexesOfRepeatingCharacters(boardModel[i])
         indexOfMatches.forEach(matchIdx => {
             // Convert matches into a position object
             matchingPositions.push(getPositionObj(i,matchIdx))
@@ -532,13 +532,13 @@ function getAllMatchingPositionsInRows() {
     }
     return matchingPositions
 }
-
+// TODO: REFACTOR
 function getAllMatchingPositionsInCols() {
     let boardModelAsColumns = getBoardColumnsAs2DArray()
     let matchingPositions = []
     // For each array in the 2d array, get character matches
     for(let i = 0; i < boardModelAsColumns.length; i++) {
-        let indexOfMatches = getIndexesOfMatchingNodesFromArray(boardModelAsColumns[i])
+        let indexOfMatches = getIndexesOfRepeatingCharacters(boardModelAsColumns[i])
         indexOfMatches.forEach(matchIdx => {
             // Convert matches into a position object
             matchingPositions.push(getPositionObj(matchIdx,i))
@@ -546,7 +546,7 @@ function getAllMatchingPositionsInCols() {
     }
     return matchingPositions
 }
-
+// TODO: REFACTOR
 // Returns 1 if anything was deleted, -1 if nothing was deleted
 function removeMatchesFromBoard() {
     // find all the matches
@@ -568,24 +568,18 @@ function removeMatchesFromBoard() {
     }
     return -1
 }
-
+// TODO: Move - Helper?
 // Search the array for repeating characters
-function getIndexesOfMatchingNodesFromArray(arr) {
-    let colorMap = arr.map(e => {
-        if(e === '-') {
-            return '-'
-        } else {
-            return e.color
-        }
-    })
-    let searchString = colorMap.join('')
+function getIndexesOfRepeatingCharacters(arr) {
+    let colorMap = arr.map(e => (e === '-') ? '-' : e.color)
+    let colorMapString = colorMap.join('')
     const searchRegExp = RegExp('y{4,}|r{4,}|b{4,}', 'gi')
-    let searchResult = searchRegExp.exec(searchString)
+    let result = searchRegExp.exec(colorMapString)
     let resultIndexes = []
-    if(searchResult !== null) {   
-        let startingPos = searchResult.index
-        let length = searchRegExp.lastIndex - searchResult.index
-        for(let i = 0; i < length; i++) {
+    if(result !== null) {   
+        let startingPos = result.index
+        let matchLength = searchRegExp.lastIndex - result.index
+        for(let i = 0; i < matchLength; i++) {
             resultIndexes.push(startingPos + i)
         }
     }
@@ -593,8 +587,9 @@ function getIndexesOfMatchingNodesFromArray(arr) {
     return resultIndexes
 
 }
-
+// TODO: MOVE - helper
 // Flip the board sideways so I can check columns of a 2D array as if they were a single row.
+// Helpful when looking for matches.
 function getBoardColumnsAs2DArray() {
     let mappedArr = []
     for(let col = 0; col < boardModel[0].length; col++) {
@@ -606,24 +601,17 @@ function getBoardColumnsAs2DArray() {
     }
     return mappedArr
 }
-
+// TODO: MOVE - helper
 function setOverlayOpacity(percent) {
     boardOverlay.style.opacity = `${percent}%`
 }
-
+// TODO: MOVE - render
 function renderGameOverOverlay() {
-    if(gameState === 1) {
-
-        message.textContent = 'Winner!'
-    } else {
-        message.textContent = 'Game Over'
-    }
     virusMessage.style.visibility = 'hidden'
     startButton.style.visibility = 'visible'
     setOverlayOpacity(80)
 }
-
-function renderVirusMessage() {
-    virusMessage.style.visibility = 'visible'
+// TODO MOVE - render
+function renderVirusCount() {
     virusMessage.textContent = `${virusCount} viruses left`
 }
