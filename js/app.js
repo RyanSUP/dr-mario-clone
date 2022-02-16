@@ -376,39 +376,36 @@ function logBoard() {
     console.log('=====================')
 }
 
-function checkForBlockedSpawn() {
-    if (getNodeFromBoardModelAt(SPAWN_POSITION_A) !== '-' || 
-            getNodeFromBoardModelAt(SPAWN_POSITION_B) !== '-' ) {
-                gameState = -1
-            } 
-}
-
-function checkGameState() {
-    // Win condition
-    if(virusCount === 0) {
-        gameState = 1
-    }
-    // Lose condition
+function isSpawnPositionBlocked() {
     if (
         getNodeFromBoardModelAt(SPAWN_POSITION_A) !== '-' || 
         getNodeFromBoardModelAt(SPAWN_POSITION_B) !== '-' 
     ) {
-        gameState = -1
-    } 
+        return true
+    }
+    return false
 }
+
 
 async function runGameLoop() {
     while(gameState === 0) {
-        spawnPlayerPill()
-        await movePlayerPieceUntilItsBlocked()
-        while(removeMatchesFromBoard() > 0) {
-            let nodesAreFalling = true
-            while(nodesAreFalling) {
-                nodesAreFalling = await moveAllFloatingNodesDownUntilBlocked()
+        if(isSpawnPositionBlocked()) {
+            gameState = -1
+        } else {
+            spawnPlayerPill()
+            await movePlayerPieceUntilItsBlocked()
+            while(removeMatchesFromBoard() > 0 && gameState === 0) {
+                let nodesAreFalling = true
+                while(nodesAreFalling) {
+                    nodesAreFalling = await moveAllFloatingNodesDownUntilBlocked()
+                }
+                countRemainingVirusesOnBoard()
+                if(virusCount === 0) {
+                    gameState = 1
+                    break;
+                }
             }
-            countRemainingVirusesOnBoard()
         }
-        checkGameState()
         render()
     }
     // Game is over
