@@ -44,7 +44,6 @@ let difficulty
 let gameSpeed = 400
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
 /* ------------------------------- 🎮 Player Nodes -------------------------------- */
-// TODO: REFACTOR
 class PlayerNodes {
 
     constructor() {
@@ -120,7 +119,6 @@ class PlayerNodes {
     handleBlockedRotation(direction) {
         let positionRightOfHinge = getAddedPositions(this.nodes[0].position, RIGHT)
         let positionLeftOfHinge = getAddedPositions(this.nodes[0].position, LEFT)
-
         if (getNodeAtPosition(positionRightOfHinge) !== '-' &&
             getNodeAtPosition(positionLeftOfHinge) === '-'
         ) {
@@ -358,10 +356,8 @@ function moveAllFloatingNodesDownUntilBlocked() {
                         nodesInCurrentRow.push(square)
                     }
                 })
-            
                 // Filter for floating nodes
                 let floatingNodes = getFloatingNodes(nodesInCurrentRow)
-            
                 // Move all the floating nodes down 1 space
                 if(floatingNodes.length > 0) {
                     movedANode = true
@@ -405,11 +401,9 @@ function removeMatchesFromBoard() {
     let rowMatches = getArrayOfMatchingPositionsFromRows()
     let colMatches = getArrayOfMatchingPositionsFromColumns()
     let allMatchingPositions = rowMatches.concat(colMatches)
-
     if(allMatchingPositions.length > 0) {
         let uniqueMatches = new Set()
         allMatchingPositions.forEach(position => uniqueMatches.add(getNodeAtPosition(position)))
-    
         uniqueMatches.forEach(node => {
             if(node.sibling !== null) {
                 decoupleSiblings(node)
@@ -441,7 +435,6 @@ function getRandomizedVirusNode(handicap) {
     let randomRow = Math.floor(Math.random() * TOTAL_ROWS + handicap)
     randomRow = clampNum(randomRow, handicap, 15)
     let randomCol = Math.floor(Math.random() * TOTAL_COLS)
-
     return {
         color: VIRUS_COLORS[randomIdx],
         position: { row: randomRow, col: randomCol },
@@ -459,13 +452,11 @@ function getFloatingNodes(nodeArray) {
         if(VIRUS_COLORS.includes(node.color)) {
             return false
         }
-
         // space below is not empty, can't move down
         let target = getAddedPositions(node.position, BOTTOM)
         if(getNodeAtPosition(target) !== '-') {
             return false
         }
-
         // If the node has a sibling
         if(node.sibling !== null) {
             // and the sibling is on the same row
