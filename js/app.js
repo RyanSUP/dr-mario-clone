@@ -376,12 +376,20 @@ async function asyncGameLoop() {
     while(gameState === 0) {
         await asyncPlayerMove()
         let deleteCount = removeMatchesFromBoard()
-        if(deleteCount > 0) {
+        while(deleteCount > 0) {
             let updating = true
             while(updating) {
                 updating = await test()
             }
-        } 
+            deleteCount = removeMatchesFromBoard()
+        }// nodes are deleted
+        // let deleteCount = removeMatchesFromBoard()
+        // if(deleteCount > 0) {
+        //     let updating = true
+        //     while(updating) {
+        //         updating = await test()
+        //     }
+        // } 
         checkForBlockedSpawn()
         countCapitalsOnBoardModel()
         spawnPlayerPill()
@@ -450,7 +458,6 @@ function test() {
                         addNodeToBoardModel(node)
                     })
                 }
-                console.log(currentRowIndex, movedANode)
                 currentRowIndex--;
             }
             render()
@@ -592,4 +599,4 @@ function getBoardColumnsAs2DArray() {
 
 /* -------------------------------  Main  -------------------------------- */
 init()
-//asyncGameLoop()
+asyncGameLoop()
