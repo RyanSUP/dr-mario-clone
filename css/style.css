@@ -111,7 +111,8 @@ section.next {
 .planet {
     width: 457px;
     position: absolute;
-    bottom: 200px;
+    top: 90px;
+    left: -100px;
 }
 
 span {
