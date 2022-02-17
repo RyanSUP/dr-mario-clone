@@ -7,7 +7,7 @@ die.
 
 Dr. Mario needs your help destroying the latest viral threat to the Mushroom Galaxy in this highly futuristic, fast paced, falling block puzzle game!
 
-// Link to game
+[Play Dr. Mario 2323](https://drmario-2323.surge.sh/)
 
 ## How to play
 
