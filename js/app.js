@@ -33,16 +33,16 @@ const HORIZONTAL = -1
 const VERTICAL = 1
 
 // These colors will determine color on the board when rendering, and also be used as symbols in the board data model
-const NODE_COLORS = ['r', 'y', 'b']
-const VIRUS_COLORS = ['R', 'Y', 'B']
+const NODE_COLORS = ['a', 'b', 'c']
+const VIRUS_COLORS = ['A', 'B', 'C']
 
 /* -------------------------------  Variables  -------------------------------- */
 let sqDivs // The boardview
 let boardModel // The board model
-let virusCount
-let playerNodes
+let virusCount // get to 0 to win!
+let playerNodes // The nodes controlled by the player
+let gameSpeed // how fast the nodes move down the board on their own
 let level = 0
-let gameSpeed = 400
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
 /* ------------------------------- 🎮 Player Nodes 💊 -------------------------------- */
 class PlayerNodes {
@@ -242,6 +242,7 @@ startButton.addEventListener('click', evt => {
 function init() {
     gameState = 0
     level++
+    gameSpeed = 400
     // Create the HTML (View) board 
     boardContainer.innerHTML = ''
     sqDivs = []
@@ -602,7 +603,7 @@ function getArrayOfMatchingPositionsFromColumns() {
 function getIndexesOfRepeatingCharacters(arr) {
     let colorMap = arr.map(e => (e === '-') ? '-' : e.color)
     let colorMapString = colorMap.join('')
-    const searchRegExp = RegExp('y{4,}|r{4,}|b{4,}', 'gi')
+    const searchRegExp = RegExp('a{4,}|b{4,}|c{4,}', 'gi')
     let result = searchRegExp.exec(colorMapString)
     let resultIndexes = []
     if(result !== null) {   

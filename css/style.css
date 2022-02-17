@@ -104,15 +104,15 @@ h1 {
     background-color: var(--body-bg);
 }
 
-.Y {
+.A {
     background-color: var(--A-color);
 }
 
-.R {
+.B {
     background-color: var(--B-color);
 }
 
-.B {
+.C {
     background-color: var(--C-color);
 }
 
@@ -124,7 +124,7 @@ h1 {
     border: 3px solid var(--piece-border);
 }
 
-.y {
+.a {
     background-color: var(--A-color);
     border: 8px double var(--A-color);
     -webkit-background-clip: padding-box; /* for Safari */
@@ -132,7 +132,7 @@ h1 {
     border-radius: 2px;
 }
 
-.r {
+.b {
     background-color: var(--B-color);
     border: 8px double var(--B-color);
     -webkit-background-clip: padding-box; /* for Safari */
@@ -141,7 +141,7 @@ h1 {
 
 }
 
-.b {
+.c {
     background-color: var(--C-color);
     border: 8px double var(--C-color);
     -webkit-background-clip: padding-box; /* for Safari */
