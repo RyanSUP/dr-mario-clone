@@ -264,7 +264,7 @@ musicButton.addEventListener('click', playAudio)
 music.addEventListener('ended', ()=> {
     console.log('audio event')
     music = new Audio('../audio/Automatav2.mp3')
-    music.volume = .40
+    music.volume = .20
     music.play()
 })
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
@@ -390,7 +390,7 @@ function renderGameOverOverlay() {
 }
 
 function renderGameInfo() {
-    badThingsMessage.textContent = `${badThingsCount} bads`
+    badThingsMessage.textContent = `${badThingsCount} viruses`
     levelMessage.textContent = `Level ${level}`
 }
 
@@ -631,7 +631,7 @@ function getAddedPositions(posObjA, posObjB) {
 }
 
 function playAudio() {
-    music.volume = .40;
+    music.volume = .20;
     if(musicPlaying) {
         music.pause()
     } else {

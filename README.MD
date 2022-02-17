@@ -1,0 +1,55 @@
+![Title](https://i.imgur.com/SOni764.png)
+
+The year is 2323 and Nintendo's Mario franchise  
+just  
+won't  
+die.  
+
+Dr. Mario needs your help destroying the latest viral threat to the Mushroom Galaxy in this highly futuristic, fast paced, falling block puzzle game!
+
+// Link to game
+
+## How to play
+
+Controls:
+* ← ↓ → move
+* z ⤿ rotate counter clockwise
+* ⤾ x rotate clockwise
+
+Eliminate all of the viruses to win!
+
+![Viruses](https://i.imgur.com/EB3UGJD.png)
+
+Connect 4 or more of the same color to remove blocks and viruses from the board.
+
+![Connect4](https://i.imgur.com/nMJ7cOg.png)
+
+Any floating blocks will fall down. But be careful, those viruses won't budge!
+
+![DropDemo](https://i.imgur.com/ZTLoBqd.png)
+
+## Project Inspiration
+My sister and I play this game a lot and I thought building it would be a fun challenge. And oh, a challenge it was...
+
+## Credits
+HUGE thanks to the following artists for their work:
+
+### [Lana Ro](https://lana-ro.itch.io/sra-free-pixel-font-pack)
+* [Pixel Font Pack](https://lana-ro.itch.io/sra-free-pixel-font-pack)
+
+### [Deep Fold](https://deep-fold.itch.io/)
+* [Space Background Generator](https://deep-fold.itch.io/space-background-generator)
+
+### [Doss-88](https://www.youtube.com/user/AntiMulletpunk)
+* [Synthwave Music](https://dos88.itch.io/dos-88-music-library)
+
+## Technologies used
+  * HTML
+  * CSS
+  * JavaScript
+
+## Next steps
+* Pausing the game
+* Animations
+* Continuous music / playlist
+* Working out some kinks
