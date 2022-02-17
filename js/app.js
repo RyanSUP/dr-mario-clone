@@ -54,6 +54,8 @@ class PlayerNodes {
         // Nodes always start connected to their sibling
         nodeA.sibling = nodeB
         nodeB.sibling = nodeA
+        nodeA.border = [1,0,1,1]
+        nodeB.border = [1,1,1,0]
         // The first element in this array will always be the hinge node.
         this.nodes = [nodeA, nodeB]
         // This is important for rotating.
@@ -66,6 +68,7 @@ class PlayerNodes {
             color: NODE_COLORS[randomIdx],
             sibling: null,
             position: startPosition,
+            border: [] // An array representing where the border should not show between the 2 nodes. [1,1,1,0] where 0 is no border.
         }
     }
 
@@ -128,6 +131,7 @@ class PlayerNodes {
                     this.nodes[1].position = this.nodes[0].position
                     this.nodes[0].position = positionLeftOfHinge
                     this.updateOrientation()
+                    this.updateNodeBorderClockwise()
                 })
             } else {
                 this.updateNodePosition(() => {
@@ -135,6 +139,7 @@ class PlayerNodes {
                     this.nodes[0].position = this.nodes[0].position
                     this.nodes.reverse() // set new hinge
                     this.updateOrientation()
+                    this.updateNodeBorderCounterClockwise()
                 })
             }
         }
@@ -166,6 +171,7 @@ class PlayerNodes {
                 this.nodes[1].position = getAddedPositions(this.nodes[1].position, BOTTOM_RIGHT)
             }
             this.updateOrientation()
+            this.updateNodeBorderClockwise()
         })
     }
 
@@ -180,6 +186,22 @@ class PlayerNodes {
                 this.nodes.reverse()
             }
             this.updateOrientation()
+            this.updateNodeBorderCounterClockwise()
+        })
+    }
+
+    updateNodeBorderClockwise() {
+        this.nodes.forEach(node => {
+            let val = node.border.pop()
+            node.border.unshift(val)
+        })
+
+    }
+
+    updateNodeBorderCounterClockwise() {
+        this.nodes.forEach(node => {
+            let val = node.border.shift()
+            node.border.push(val)
         })
     }
 }
@@ -289,7 +311,8 @@ function renderBoard() {
             sqDivs[row][col].className = 'sq'
             if (boardModel[row][col] !== '-') {
                 let node = boardModel[row][col]
-                sqDivs[row][col].classList.add(node.color)
+                let nodeBorderStyle = parseBorderArray(node)
+                sqDivs[row][col].classList.add(node.color, nodeBorderStyle)
             }
         }
     }
@@ -297,7 +320,7 @@ function renderBoard() {
 
 function renderGameOverOverlay() {
     virusMessage.style.visibility = 'hidden'
-    level.style.visibility = 'hidden'
+    levelMessage.style.visibility = 'hidden'
     startButton.style.visibility = 'visible'
     boardOverlay.style.visibility = 'visible'
 }
@@ -446,7 +469,8 @@ function getRandomizedVirusNode(handicap) {
     return {
         color: VIRUS_COLORS[randomIdx],
         position: { row: randomRow, col: randomCol },
-        sibling: null
+        sibling: null,
+        border: [],
     }
 }
 
@@ -495,6 +519,26 @@ function countRemainingVirusesOnBoardModel() {
         }
     }
     virusCount = total
+}
+
+function parseBorderArray(node){
+    if(node.border.length === 0) {
+        return 'dashed' // Virus
+    }
+    if(node.sibling === null) {
+        return 'omit-none'
+    }
+    let zeroAt = node.border.findIndex(element => element === 0)
+    switch (zeroAt) {
+        case 0:
+            return 'omit-top'
+        case 1:
+            return 'omit-right'
+        case 2:
+            return 'omit-bottom'
+        case 3:
+            return 'omit-left'
+    }
 }
 
 /* ------------------------------- 👷‍♂️ Misc Helpers 🏗 -------------------------------- */

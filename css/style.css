@@ -93,33 +93,42 @@ h1 {
 
 .Y {
     background-color: rgb(255, 255, 121);
-    border: 3px dashed rgb(0, 0, 0);
 }
 
 .R {
     background-color: rgb(255, 114, 114);
-    border: 3px dashed rgb(0, 0, 0);
-
-
 }
 
 .B {
     background-color: rgb(116, 116, 255);
+}
+
+.dashed {
     border: 3px dashed rgb(0, 0, 0);
+}
 
-
+.omit-none {
+    border: 3px solid gray;
 }
 
 .y {
     background-color: rgb(255, 255, 121);
+    border: 3px solid gray;
+    border-radius: 4px;
 }
 
 .r {
     background-color: rgb(255, 114, 114);
+    border: 3px solid gray;
+    border-radius: 4px;
+
 }
 
 .b {
     background-color: rgb(116, 116, 255);
+    border: 3px solid gray;
+    border-radius: 4px;
+
 }
 
 .info {
@@ -127,4 +136,21 @@ h1 {
     display: flex;
     justify-content:  space-around;
     font-size: 1.2rem;
+}
+
+.omit-left {
+    border-left: none;
+}
+
+.omit-right {
+    border-right: none;
+
+}
+
+.omit-bottom {
+    border-bottom: none;
+}
+
+.omit-top {
+    border-top: none;
 }
