@@ -139,7 +139,7 @@ section.board-overlay {
 h1 {
     align-self: start;
     font-family: 'PixelFont';
-    font-size: 8.2rem;
+    font-size: 10.2rem;
     color: var(--title-color);
     text-shadow: 0 5px var(--text-accent);
     margin: 10px 0 0 20px;
@@ -225,6 +225,7 @@ h1 {
 @media only screen and (max-width: 1024px) {
     h1 {
         align-self: center;
+        font-size: 8.2rem;
     }
     .controls {
         background-color: var(--body-bg);
