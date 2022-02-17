@@ -2,6 +2,7 @@
 const boardContainer = document.querySelector('.board-container')
 const boardOverlay = document.querySelector('.board-overlay')
 const startButton = document.querySelector('.start-btn')
+const musicButton = document.querySelector('.music-btn')
 const message = document.querySelector('.message')
 const virusMessage = document.querySelector('.virus-message')
 const levelMessage = document.querySelector('.level')
@@ -245,6 +246,8 @@ startButton.addEventListener('mouseover', evt => {
 startButton.addEventListener('mouseleave', evt => {
     evt.target.innerHTML = "START"
 }) 
+
+musicButton.addEventListener('click', playAudio)
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
 function init() {
     gameState = 0
@@ -305,7 +308,7 @@ function render() {
         renderBoard()
         renderGameInfo()
     } else {
-        message.textContent = (gameState === 1) ? 'Winner!' : 'Game Over'
+        message.textContent = (gameState === 1) ? 'Next Level!' : 'Game Over'
         renderGameOverOverlay()
     }
     // render score
@@ -334,7 +337,7 @@ function renderGameOverOverlay() {
 }
 
 function renderGameInfo() {
-    virusMessage.textContent = `${virusCount} viruses left`
+    virusMessage.textContent = `${virusCount} bad things left`
     levelMessage.textContent = `Level ${level}`
 }
 
