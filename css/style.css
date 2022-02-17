@@ -161,10 +161,6 @@ h1 {
     background-color: var(--C-color);
 }
 
-.next-node {
-    opacity: 20%;
-}
-
 .omit-none {
     border: 3px solid var(--piece-border);
 }
@@ -193,7 +189,7 @@ h1 {
 .info {
     height: 60px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     font-size: 1.8rem;
 }
 

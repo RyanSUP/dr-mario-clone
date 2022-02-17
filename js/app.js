@@ -371,8 +371,15 @@ function renderBoard() {
 function renderNextNodes() {
     nextNodeSqDivs[0].className = 'sq'
     nextNodeSqDivs[1].className = 'sq'
-    nextNodeSqDivs[0].classList.add(nextNodes.nodes[0].color, 'next-node')
-    nextNodeSqDivs[1].classList.add(nextNodes.nodes[1].color, 'next-node')
+    nextNodeSqDivs[0].classList.add(
+        nextNodes.nodes[0].color, 
+        parseBorderArray(nextNodes.nodes[0])
+    )
+    nextNodeSqDivs[1].classList.add(
+        nextNodes.nodes[1].color, 
+        parseBorderArray(nextNodes.nodes[1])
+    )
+    
 }
 
 function renderGameOverOverlay() {
@@ -383,7 +390,7 @@ function renderGameOverOverlay() {
 }
 
 function renderGameInfo() {
-    badThingsMessage.textContent = `${badThingsCount} bad cubes left`
+    badThingsMessage.textContent = `${badThingsCount} bads`
     levelMessage.textContent = `Level ${level}`
 }
 
@@ -408,6 +415,7 @@ async function runGameLoop() {
     while(gameState === 0) {
         if(isSpawnPositionBlocked()) {
             gameState = -1
+            level = 1
         } else {
             spawnPlayerNodes()
             spawnNextNodes()
@@ -606,9 +614,6 @@ function parseBorderArray(node){
 function addNodeClassesToBoard(htmlEle, node) {
     htmlEle.classList.add(node.color)
     htmlEle.classList.add(parseBorderArray(node))
-    if(node.isNext) {
-        htmlEle.classList.add('next-node')
-    }
 }
 
 /* ------------------------------- 👷‍♂️ Misc Helpers 🏗 -------------------------------- */
