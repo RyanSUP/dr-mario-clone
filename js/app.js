@@ -331,7 +331,7 @@ function initBoardModel() {
 
 function initBadThings() {
     for (let i = 0; i < badThingsCount; i++) {
-        let v = getRandomBadThing(5)
+        let v = getRandomBadThing(7)
         boardModel[v.position.row][v.position.col] = v
     }
 }
