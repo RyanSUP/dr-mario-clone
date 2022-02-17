@@ -61,7 +61,8 @@ section.board-container {
     color: white;
     width: 150px;
     font-size: 3.5rem;
-    margin: 0;
+    position: absolute;
+    top: 80px;
 }
 .start-btn {
     font-family: 'PixelFont';
@@ -75,7 +76,13 @@ section.board-container {
 }
 
 .start-btn:hover {
-    border-bottom: 4px solid var(--title-color);
+    text-shadow: 0 3px #3A0CA3;
+}
+
+span {
+    font-family: 'PixelFont';
+    font-size: 8rem;
+    color: var(--title-color);
 }
 
 /* 192 x 384 */
@@ -100,6 +107,8 @@ h1 {
     text-shadow: 0 3px #3A0CA3;
     margin: 10px 0 0 20px;
 }
+
+
 
 .sq {
     width: 100%;

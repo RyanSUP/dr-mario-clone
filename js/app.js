@@ -238,6 +238,13 @@ startButton.addEventListener('click', evt => {
     runGameLoop()
 })
 
+startButton.addEventListener('mouseover', evt => {
+    evt.target.innerHTML = "<span>></span> START <span><</span>"
+})
+
+startButton.addEventListener('mouseleave', evt => {
+    evt.target.innerHTML = "START"
+}) 
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
 function init() {
     gameState = 0
