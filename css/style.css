@@ -107,6 +107,13 @@ section.next {
     text-shadow: 0 3px #3A0CA3;
 }
 
+.planet {
+    width: 200px;
+    position: absolute;
+    right: 200px;
+    bottom: 100px;
+}
+
 span {
     font-family: 'PixelFont';
     font-size: 8rem;
