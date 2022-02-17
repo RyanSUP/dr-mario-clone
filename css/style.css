@@ -60,7 +60,7 @@ section.board-container {
     text-align: center;
     color: white;
     width: 150px;
-    font-size: 9rem;
+    font-size: 8rem;
     position: absolute;
     top: -60px;
 }
@@ -114,6 +114,7 @@ section.board-overlay {
 }
 
 h1 {
+    align-self: start;
     font-family: 'PixelFont';
     font-size: 10.2rem;
     color: var(--title-color);
@@ -175,10 +176,10 @@ h1 {
 }
 
 .info {
-    height: 40px;
+    height: 60px;
     display: flex;
     justify-content: space-around;
-    font-size: 1.2rem;
+    font-size: 1.8rem;
 }
 
 .omit-left {
@@ -198,6 +199,12 @@ h1 {
     border-top: none;
 }
 
-.title {
-    align-self: start;
+
+@media only screen and (max-width: 768px) {
+    h1 {
+        align-self: center;
+    }
+    .controls {
+        background-color: var(--body-bg);
+    }
 }
