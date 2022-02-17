@@ -54,3 +54,5 @@ HUGE thanks to the following artists for their work:
 * Animations
 * Continuous music / playlist
 * Working out some kinks
+* Scoring
+* better level complete message
