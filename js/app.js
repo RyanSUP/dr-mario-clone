@@ -45,6 +45,8 @@ let playerNodes // The nodes controlled by the player
 let gameSpeed // how fast the nodes move down the board on their own
 let level = 0
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
+let musicPlaying = false // for toggling music
+let music = new Audio('../audio/Race-to-Mars.mp3')
 /* ------------------------------- 🎮 Player Nodes 💊 -------------------------------- */
 class PlayerNodes {
 
@@ -248,6 +250,13 @@ startButton.addEventListener('mouseleave', evt => {
 }) 
 
 musicButton.addEventListener('click', playAudio)
+
+music.addEventListener('ended', ()=> {
+    console.log('audio event')
+    music = new Audio('../audio/Automatav2.mp3')
+    music.volume = .40
+    music.play()
+})
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
 function init() {
     gameState = 0
@@ -568,9 +577,13 @@ function getAddedPositions(posObjA, posObjB) {
 }
 
 function playAudio() {
-    const music = new Audio('../audio/Race-to-Mars.mp3')
-    music.volume = .40
-    music.play()
+    music.volume = .40;
+    if(musicPlaying) {
+        music.pause()
+    } else {
+        music.play()
+    }
+    musicPlaying = !musicPlaying
 }
 
 function getNodeAtPosition(positionObj) { return boardModel[positionObj.row][positionObj.col] }
@@ -646,11 +659,4 @@ function getRotatedBoardModel() {
         mappedArr.push(colArray)
     }
     return mappedArr
-}
-
-function style() {
-    hideBoardOverlay()
-    init()
-    spawnPlayerNodes()
-    render()
 }
