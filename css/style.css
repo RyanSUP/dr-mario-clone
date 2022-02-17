@@ -23,10 +23,11 @@ html {
 :root {
     font-size: 62.5%;
     --A-color: #f72585;
-    --B-color: #aefc40;
-    --C-color: #7209b7;
+    --B-color: #FED742;
+    --C-color: #2F68DC;
     --body-bg: #0b042e;
     --title-color: #F72585;
+    --text-accent: #2F68DC
 }
   
 body {
@@ -104,14 +105,13 @@ section.next {
 }
 
 .start-btn:hover {
-    text-shadow: 0 3px #3A0CA3;
+    text-shadow: 0 3px var(--text-accent);
 }
 
 .planet {
-    width: 200px;
+    width: 457px;
     position: absolute;
-    right: 200px;
-    bottom: 100px;
+    bottom: 130px;
 }
 
 span {
@@ -141,7 +141,7 @@ h1 {
     font-family: 'PixelFont';
     font-size: 8.2rem;
     color: var(--title-color);
-    text-shadow: 0 5px #3A0CA3;
+    text-shadow: 0 5px var(--text-accent);
     margin: 10px 0 0 20px;
 }
 
