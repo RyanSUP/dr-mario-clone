@@ -359,7 +359,7 @@ function renderBoard() {
             if (boardModel[row][col] !== '-') {
                 let node = boardModel[row][col]
                 if(node.isBad){
-                    sqDivs[row][col].classList.add(node.color)
+                    sqDivs[row][col].classList.add(node.color, 'dashed')
                 } else {
                     addNodeClassesToBoard(sqDivs[row][col], node)
                 }

@@ -6,6 +6,7 @@
 html {
     box-sizing: border-box;
     background-color: var(--body-bg);
+    overflow: hidden;
 }
   
   /* The Universal Selector */
@@ -131,7 +132,7 @@ section.board-overlay {
 h1 {
     align-self: start;
     font-family: 'PixelFont';
-    font-size: 10.2rem;
+    font-size: 8.2rem;
     color: var(--title-color);
     text-shadow: 0 5px #3A0CA3;
     margin: 10px 0 0 20px;
@@ -210,6 +211,9 @@ h1 {
     border-top: none;
 }
 
+.dashed {
+    border: 4px dashed var(--body-bg);
+}
 
 @media only screen and (max-width: 768px) {
     h1 {
