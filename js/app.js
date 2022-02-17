@@ -630,4 +630,9 @@ function getRotatedBoardModel() {
     return mappedArr
 }
 
-
+function style() {
+    hideBoardOverlay()
+    init()
+    spawnPlayerNodes()
+    render()
+}
