@@ -39,6 +39,7 @@ HUGE thanks to the following artists for their work:
 
 ### [Deep Fold](https://deep-fold.itch.io/)
 * [Space Background Generator](https://deep-fold.itch.io/space-background-generator)
+* [Pixel Planet Generator](https://deep-fold.itch.io/pixel-planet-generator)
 
 ### [Doss-88](https://www.youtube.com/user/AntiMulletpunk)
 * [Synthwave Music](https://dos88.itch.io/dos-88-music-library)

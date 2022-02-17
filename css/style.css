@@ -222,7 +222,7 @@ h1 {
     border: 4px dashed var(--body-bg);
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 1024px) {
     h1 {
         align-self: center;
     }
