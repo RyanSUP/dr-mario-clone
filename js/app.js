@@ -457,6 +457,7 @@ function removeMatchesFromBoard() {
 
 function increaseSpeed() {
     gameSpeed -= 5
+    gameSpeed = clampNum(gameSpeed,250, 400)
 }
 
 /* ------------------------------- 🦠 Node Helpers 💊 -------------------------------- */
@@ -561,6 +562,12 @@ function getAddedPositions(posObjA, posObjB) {
         row: posObjA.row + posObjB.row,
         col: posObjA.col + posObjB.col
     }
+}
+
+function playAudio() {
+    const music = new Audio('../audio/Race-to-Mars.mp3')
+    music.volume = .40
+    music.play()
 }
 
 function getNodeAtPosition(positionObj) { return boardModel[positionObj.row][positionObj.col] }

@@ -29,7 +29,7 @@ html {
 }
   
 body {
-    background-image: url('../css/Space-Background.png');
+    background-image: url('../images/Space-Background.png');
     background-size: cover;
     /* Use a system font, if none are available use an available sans-sarif font */
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
