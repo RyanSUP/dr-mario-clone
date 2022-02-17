@@ -52,7 +52,8 @@ section.board-container {
     grid-template-columns: repeat(8, 28px);
     width: max-content;
     padding: 5px;
-    border: 20px double #480CA8;
+    border: 8px double var(--title-color);
+
 }
 
 .message {
@@ -107,8 +108,8 @@ section.board-overlay {
     position: absolute;
     background-color: var(--body-bg);
     opacity: 100%;
-    width: 274px;
-    height: 498px;
+    width: 250px;
+    height: 474px;
     padding: 2px;
     border: 8px double var(--title-color);
 }
