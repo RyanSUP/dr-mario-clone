@@ -1,10 +1,11 @@
 /* -------------------------------  CACHED REFERENCES  -------------------------------- */
 const boardContainer = document.querySelector('.board-container')
+const nextNodeContainer = document.querySelector('.next')
 const boardOverlay = document.querySelector('.board-overlay')
 const startButton = document.querySelector('.start-btn')
 const musicButton = document.querySelector('.music-btn')
 const message = document.querySelector('.message')
-const virusMessage = document.querySelector('.virus-message')
+const badThingsMessage = document.querySelector('.bad-things-message')
 const levelMessage = document.querySelector('.level')
 
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
@@ -35,13 +36,15 @@ const VERTICAL = 1
 
 // These colors will determine color on the board when rendering, and also be used as symbols in the board data model
 const NODE_COLORS = ['a', 'b', 'c']
-const VIRUS_COLORS = ['A', 'B', 'C']
+const BAD_THINGS_COLORS = ['A', 'B', 'C']
 
 /* -------------------------------  Variables  -------------------------------- */
-let sqDivs // The boardview
+let nextNodeSqDivs // to show player next pieces
+let sqDivs // The game board elements
 let boardModel // The board model
-let virusCount // get to 0 to win!
+let badThingsCount // get to 0 to win!
 let playerNodes // The nodes controlled by the player
+let nextNodes
 let gameSpeed // how fast the nodes move down the board on their own
 let level = 0
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
@@ -68,10 +71,13 @@ class PlayerNodes {
     createNode(startPosition) {
         let randomIdx = Math.floor(Math.random() * NODE_COLORS.length)
         return {
+            isBad: false,
+            isNext: false,
             color: NODE_COLORS[randomIdx],
             sibling: null,
             position: startPosition,
-            border: [] // An array representing where the border should not show between the 2 nodes. [1,1,1,0] where 0 is no border.
+            // An array representing where the border should not show between the 2 nodes. [1,1,1,0] where 0 is no border.
+            border: [],
         }
     }
 
@@ -107,7 +113,7 @@ class PlayerNodes {
                 return false
             }
         }
-        // If the move is legal, updates the positon
+        //move is legal, updates the positon
         this.updateNodePosition(() => {
             this.nodes.forEach(n => n.position = getAddedPositions(n.position, positionOffset))
         })
@@ -230,6 +236,10 @@ function handleKeyPress(evt) {
             case 'KeyX':
                 playerNodes.rotate(CLOCKWISE)
                 break
+            case 'KeyR':
+                pauseState = !pauseState
+                console.log(pauseState)
+                break
         }
         render()
     }
@@ -263,23 +273,39 @@ function init() {
     level++
     gameSpeed = 400
     // Create the HTML (View) board 
+    nextNodeContainer.innerHTML = ''
+    nextNodeSqDivs = []
+    initNextNodeBoard()
     boardContainer.innerHTML = ''
     sqDivs = []
     initSqDivs()
     // Init board model to all nulls
     boardModel = []
+    boardModel = []
     initBoardModel()
-    // set starting viruses
-    virusCount = (2 + level) * 4
-    virusCount = clampNum(virusCount, 12, 96)
-    initVirusesOnBoardModel()
-    countRemainingVirusesOnBoardModel() // this is a bandaid around the issue where viruses can spawn on eachother and alter the visible count
-    virusMessage.style.visibility = 'visible'
+    // set starting bad things
+    badThingsCount = (2 + level) * 4
+    badThingsCount = clampNum(badThingsCount, 12, 96)
+    initBadThings()
+    countRemainingBadThings() // this is a bandaid around the issue where Bad thinds can spawn on eachother and alter the visible count
+    badThingsMessage.style.visibility = 'visible'
     levelMessage.style.visibility = 'visible'
+    spawnNextNodes()
     render()
 }
 
+function initNextNodeBoard() {
+    for(let i = 0; i < 2; i++) {
+        const div = document.createElement('div')
+        div.className = 'sq'
+        // ^ looks like this -->  <div class="sq"></div>
+        nextNodeContainer.append(div)
+        nextNodeSqDivs.push(div)
+    }
+}
+
 function initSqDivs() {
+    // Main board
     for (let row = 0; row < TOTAL_ROWS; row++) {
         const divsInRow = []
         for (let col = 0; col < TOTAL_COLS; col++) {
@@ -303,9 +329,9 @@ function initBoardModel() {
     }
 }
 
-function initVirusesOnBoardModel() {
-    for (let i = 0; i < virusCount; i++) {
-        let v = getRandomizedVirusNode(5)
+function initBadThings() {
+    for (let i = 0; i < badThingsCount; i++) {
+        let v = getRandomBadThing(5)
         boardModel[v.position.row][v.position.col] = v
     }
 }
@@ -315,6 +341,7 @@ function initVirusesOnBoardModel() {
 function render() {
     if(gameState === 0) {
         renderBoard()
+        renderNextNodes()
         renderGameInfo()
     } else {
         message.textContent = (gameState === 1) ? 'Next Level!' : 'Game Over'
@@ -331,22 +358,32 @@ function renderBoard() {
             sqDivs[row][col].className = 'sq'
             if (boardModel[row][col] !== '-') {
                 let node = boardModel[row][col]
-                let nodeBorderStyle = parseBorderArray(node)
-                sqDivs[row][col].classList.add(node.color, nodeBorderStyle)
+                if(node.isBad){
+                    sqDivs[row][col].classList.add(node.color)
+                } else {
+                    addNodeClassesToBoard(sqDivs[row][col], node)
+                }
             }
         }
     }
 }
 
+function renderNextNodes() {
+    nextNodeSqDivs[0].className = 'sq'
+    nextNodeSqDivs[1].className = 'sq'
+    nextNodeSqDivs[0].classList.add(nextNodes.nodes[0].color, 'next-node')
+    nextNodeSqDivs[1].classList.add(nextNodes.nodes[1].color, 'next-node')
+}
+
 function renderGameOverOverlay() {
-    virusMessage.style.visibility = 'hidden'
+    badThingsMessage.style.visibility = 'hidden'
     levelMessage.style.visibility = 'hidden'
     startButton.style.visibility = 'visible'
     boardOverlay.style.visibility = 'visible'
 }
 
 function renderGameInfo() {
-    virusMessage.textContent = `${virusCount} bad things left`
+    badThingsMessage.textContent = `${badThingsCount} bad cubes left`
     levelMessage.textContent = `Level ${level}`
 }
 
@@ -358,8 +395,13 @@ function hideBoardOverlay() {
 
 /* ------------------------------- 🥩 Meat N Taters 🥔 -------------------------------- */
 function spawnPlayerNodes() {
-    playerNodes = new PlayerNodes()
+    playerNodes = nextNodes
     playerNodes.placePlayerNodesOnBoardModel()
+}
+
+function spawnNextNodes() {
+    nextNodeSqDivs.forEach(sq => className = '')
+    nextNodes = new PlayerNodes()
 }
 
 async function runGameLoop() {
@@ -368,12 +410,13 @@ async function runGameLoop() {
             gameState = -1
         } else {
             spawnPlayerNodes()
+            spawnNextNodes()
             increaseSpeed()
             render()
             await movePlayerPieceUntilItsBlocked()
             while(removeMatchesFromBoard() > 0 && gameState === 0) {
-                countRemainingVirusesOnBoardModel()
-                if(virusCount === 0) {
+                countRemainingBadThings()
+                if(badThingsCount === 0) {
                     gameState = 1
                     break;
                 }
@@ -480,15 +523,16 @@ function decoupleSiblings(node) {
     node.sibling = null
 }
 
-// Setting the handicap ensures viruses will never be generated above the handicap row.
+// Setting the handicap ensures bad things will never be generated above the handicap row.
 // This can be adjusted to increase difficulty
-function getRandomizedVirusNode(handicap) {
-    let randomIdx = Math.floor(Math.random() * VIRUS_COLORS.length)
+function getRandomBadThing(handicap) {
+    let randomIdx = Math.floor(Math.random() * BAD_THINGS_COLORS.length)
     let randomRow = Math.floor(Math.random() * TOTAL_ROWS + handicap)
     randomRow = clampNum(randomRow, handicap, 15)
     let randomCol = Math.floor(Math.random() * TOTAL_COLS)
     return {
-        color: VIRUS_COLORS[randomIdx],
+        isBad: true,
+        color: BAD_THINGS_COLORS[randomIdx],
         position: { row: randomRow, col: randomCol },
         sibling: null,
         border: [],
@@ -501,8 +545,8 @@ function removeNodeFromBoardModel(node) { boardModel[node.position.row][node.pos
 
 function getFloatingNodes(nodeArray) {
     let floatingNodes = nodeArray.filter((node) => {
-        // Node is a virus, ignore it.
-        if(VIRUS_COLORS.includes(node.color)) {
+        // Node is a bad thing, ignore it.
+        if(BAD_THINGS_COLORS.includes(node.color)) {
             return false
         }
         // space below is not empty, can't move down
@@ -530,22 +574,19 @@ function getFloatingNodes(nodeArray) {
     return floatingNodes
 }
 
-function countRemainingVirusesOnBoardModel() {
+function countRemainingBadThings() {
     let total = 0
     for(let row of boardModel) {
         for(let col of row) {
-            if(VIRUS_COLORS.includes(col.color)) {
+            if(BAD_THINGS_COLORS.includes(col.color)) {
                 total++
             }
         }
     }
-    virusCount = total
+    badThingsCount = total
 }
 
 function parseBorderArray(node){
-    if(node.border.length === 0) {
-        return 'dashed' // Virus
-    }
     if(node.sibling === null) {
         return 'omit-none'
     }
@@ -559,6 +600,14 @@ function parseBorderArray(node){
             return 'omit-bottom'
         case 3:
             return 'omit-left'
+    }
+}
+
+function addNodeClassesToBoard(htmlEle, node) {
+    htmlEle.classList.add(node.color)
+    htmlEle.classList.add(parseBorderArray(node))
+    if(node.isNext) {
+        htmlEle.classList.add('next-node')
     }
 }
 
@@ -589,9 +638,10 @@ function playAudio() {
 function getNodeAtPosition(positionObj) { return boardModel[positionObj.row][positionObj.col] }
 
 function isSpawnPositionBlocked() {
-    if (
-        getNodeAtPosition(SPAWN_POSITION_A) !== '-' || 
-        getNodeAtPosition(SPAWN_POSITION_B) !== '-' 
+    let nodeAtA = getNodeAtPosition(SPAWN_POSITION_A)
+    let nodeAtB = getNodeAtPosition(SPAWN_POSITION_B)
+    if( (nodeAtA !== '-' && nodeAtA.isNext === false) ||
+        (nodeAtB !== '-' && nodeAtB.isNext === false)
     ) {
         return true
     }
