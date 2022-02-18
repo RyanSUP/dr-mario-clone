@@ -28,11 +28,8 @@ Any floating blocks will fall down. But be careful, those viruses won't budge!
 
 ![DropDemo](https://i.imgur.com/ZTLoBqd.png)
 
-## 💡 Project Inspiration 
-My sister and I play this game a lot and I thought building it would be a fun challenge! And oh, a challenge it was...
-
-## 🎥 Credits 🎨
-HUGE thanks to the following artists for their work:
+## 🎥 Credits 🎨 
+HUGE thanks to these artists, their amazing work makes Dr. Mario 2323 exciting to play:
 
 ### 👩‍🎨 [Lana Ro](https://lana-ro.itch.io/sra-free-pixel-font-pack)
 * [Pixel Font Pack](https://lana-ro.itch.io/sra-free-pixel-font-pack)
@@ -43,6 +40,12 @@ HUGE thanks to the following artists for their work:
 
 ### 🎶 [Dos-88](https://www.youtube.com/user/AntiMulletpunk)
 * [Synthwave Music](https://dos88.itch.io/dos-88-music-library)
+
+
+## 💡 Project Inspiration 
+My sister and I play this game a lot and I thought building it would be a fun challenge! And oh, a challenge it was...
+
+
 
 ## 👨🏻‍🔬 Technologies used 👨‍💻
   * HTML

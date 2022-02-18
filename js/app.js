@@ -284,8 +284,8 @@ function init() {
     boardModel = []
     initBoardModel()
     // set starting bad things
-    badThingsCount = (2 + level) * 2
-    badThingsCount = clampNum(badThingsCount, 6, 96)
+    badThingsCount = (2 + level) * 4
+    badThingsCount = clampNum(badThingsCount, 12, 96)
     initBadThings()
     countRemainingBadThings() // this is a bandaid around the issue where Bad thinds can spawn on eachother and alter the visible count
     badThingsMessage.style.visibility = 'visible'
