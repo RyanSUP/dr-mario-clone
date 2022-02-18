@@ -111,7 +111,7 @@ section.next {
 .planet {
     width: 457px;
     position: absolute;
-    top: 180px;
+    top: 222px;
 }
 
 span {
@@ -120,7 +120,6 @@ span {
     color: var(--title-color);
 }
 
-/* 192 x 384 */
 section.board-overlay {
     display: flex;
     flex-direction: column;

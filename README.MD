@@ -7,7 +7,7 @@ die.
 
 Dr. Mario needs your help destroying the latest viral threat to the Mushroom Galaxy in this highly futuristic, fast paced, falling block puzzle game!
 
-[Play Dr. Mario 2323](https://drmario-2323.surge.sh/)
+# [Play Dr. Mario 2323](https://drmario-2323.surge.sh/)
 
 ## How to play
 
@@ -41,13 +41,14 @@ HUGE thanks to the following artists for their work:
 * [Space Background Generator](https://deep-fold.itch.io/space-background-generator)
 * [Pixel Planet Generator](https://deep-fold.itch.io/pixel-planet-generator)
 
-### [Doss-88](https://www.youtube.com/user/AntiMulletpunk)
+### [Dos-88](https://www.youtube.com/user/AntiMulletpunk)
 * [Synthwave Music](https://dos88.itch.io/dos-88-music-library)
 
 ## Technologies used
   * HTML
   * CSS
   * JavaScript
+  * Git
 
 ## Next steps
 * Pausing the game
@@ -55,4 +56,5 @@ HUGE thanks to the following artists for their work:
 * Continuous music / playlist
 * Working out some kinks
 * Scoring
-* better level complete message
+* Better level complete message
+* Planet explodes when you lose.
