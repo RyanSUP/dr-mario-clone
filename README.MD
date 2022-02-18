@@ -7,9 +7,9 @@ die.
 
 Dr. Mario needs your help destroying the latest viral threat to the Mushroom Galaxy in this highly futuristic, fast paced, falling block puzzle game!
 
-# [Play Dr. Mario 2323](https://drmario-2323.surge.sh/)
+# [💊 Play Dr. Mario 2323](https://drmario-2323.surge.sh/)
 
-## How to play
+## 🎮 🤔 How to play
 
 Controls:
 * ← ↓ → move
@@ -28,29 +28,29 @@ Any floating blocks will fall down. But be careful, those viruses won't budge!
 
 ![DropDemo](https://i.imgur.com/ZTLoBqd.png)
 
-## Project Inspiration
-My sister and I play this game a lot and I thought building it would be a fun challenge. And oh, a challenge it was...
+## 💡 Project Inspiration 
+My sister and I play this game a lot and I thought building it would be a fun challenge! And oh, a challenge it was...
 
-## Credits
+## 🎥 Credits 🎨
 HUGE thanks to the following artists for their work:
 
-### [Lana Ro](https://lana-ro.itch.io/sra-free-pixel-font-pack)
+### 👩‍🎨 [Lana Ro](https://lana-ro.itch.io/sra-free-pixel-font-pack)
 * [Pixel Font Pack](https://lana-ro.itch.io/sra-free-pixel-font-pack)
 
-### [Deep Fold](https://deep-fold.itch.io/)
+### 🎨 [Deep Fold](https://deep-fold.itch.io/)
 * [Space Background Generator](https://deep-fold.itch.io/space-background-generator)
 * [Pixel Planet Generator](https://deep-fold.itch.io/pixel-planet-generator)
 
-### [Dos-88](https://www.youtube.com/user/AntiMulletpunk)
+### 🎶 [Dos-88](https://www.youtube.com/user/AntiMulletpunk)
 * [Synthwave Music](https://dos88.itch.io/dos-88-music-library)
 
-## Technologies used
+## 👨🏻‍🔬 Technologies used 👨‍💻
   * HTML
   * CSS
   * JavaScript
   * Git
 
-## Next steps
+## 🏗 Next steps 🚧
 * Pausing the game
 * Animations
 * Continuous music / playlist
