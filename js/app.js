@@ -284,8 +284,9 @@ function init() {
     boardModel = []
     initBoardModel()
     // set starting bad things
-    badThingsCount = (2 + level) * 4
-    badThingsCount = clampNum(badThingsCount, 12, 96)
+    badThingsCount = 1
+    // badThingsCount = (2 + level) * 4
+    // badThingsCount = clampNum(badThingsCount, 12, 96)
     initBadThings()
     countRemainingBadThings() // this is a bandaid around the issue where Bad thinds can spawn on eachother and alter the visible count
     badThingsMessage.style.visibility = 'visible'
@@ -645,9 +646,7 @@ function getNodeAtPosition(positionObj) { return boardModel[positionObj.row][pos
 function isSpawnPositionBlocked() {
     let nodeAtA = getNodeAtPosition(SPAWN_POSITION_A)
     let nodeAtB = getNodeAtPosition(SPAWN_POSITION_B)
-    if( (nodeAtA !== '-' && nodeAtA.isNext === false) ||
-        (nodeAtB !== '-' && nodeAtB.isNext === false)
-    ) {
+    if( (nodeAtA !== '-' || nodeAtB !== '-')) {
         return true
     }
     return false
