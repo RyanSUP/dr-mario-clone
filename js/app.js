@@ -72,7 +72,7 @@ class PlayerNodes {
         let randomIdx = Math.floor(Math.random() * NODE_COLORS.length)
         return {
             isBad: false,
-            isNext: false,
+            isPlayer: true,
             color: NODE_COLORS[randomIdx],
             sibling: null,
             position: startPosition,
@@ -212,6 +212,11 @@ class PlayerNodes {
             let val = node.border.shift()
             node.border.push(val)
         })
+    }
+
+    releasePlayerControl() {
+        this.nodes.forEach(n => n.isPlayer = false)
+        playerNodes = null
     }
 }
 /* ------------------------------- 🦻 Event Listeners 📡 -------------------------------- */
@@ -491,13 +496,13 @@ function movePlayerPieceUntilItsBlocked() {
     return new Promise((resolve, reject) => {
         let playerMove = setInterval(() => {
             let moveResult = playerNodes.move(BOTTOM)
+            render()
             if(moveResult === false) {
                 clearInterval(playerMove)
                 // Setting playerNodes to null here prevents players from moving pieces while falling nodes resolve.
-                playerNodes = null
+                playerNodes.releasePlayerControl()
                 resolve()
             }
-            render()
         }, gameSpeed)
     })
 }
@@ -559,6 +564,10 @@ function removeNodeFromBoardModel(node) { boardModel[node.position.row][node.pos
 
 function getFloatingNodes(nodeArray) {
     let floatingNodes = nodeArray.filter((node) => {
+        // Node is the player node
+        if(node.isPlayer) {
+            return false
+        }
         // Node is a bad thing, ignore it.
         if(BAD_THINGS_COLORS.includes(node.color)) {
             return false
