@@ -705,11 +705,11 @@ function getIndexesOfRepeatingCharacters(arr) {
     let result = searchRegExp.exec(colorMapString)
     let resultIndexes = []
     if(result !== null) {   
-        let startingPos = result.index
         let matchLength = searchRegExp.lastIndex - result.index
         for(let i = 0; i < matchLength; i++) {
-            resultIndexes.push(startingPos + i)
+            resultIndexes.push(result.index + i)
         }
+        console.log(result)
     }
     // Return the indexes. Ok to return empty []
     return resultIndexes
@@ -727,4 +727,9 @@ function getRotatedBoardModel() {
         mappedArr.push(colArray)
     }
     return mappedArr
+}
+
+function calcScore(str) {
+    const searchRegExp = RegExp('A|B|C', 'gi')
+
 }

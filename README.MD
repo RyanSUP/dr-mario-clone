@@ -5,8 +5,9 @@ just
 won't  
 die.  
 
-Dr. Mario needs your help destroying the latest viral threat to the Mushroom Galaxy in this highly futuristic, fast paced, falling block puzzle game!
-
+Dr. Mario needs your help destroying the latest viral threat to the Mushroom Galaxy in this highly futuristic, fast paced, falling block puzzle game!  
+#
+(Desktop only)
 # [💊 Play Dr. Mario 2323](https://drmario-2323.surge.sh/)
 
 ## 🎮 🤔 How to play
@@ -55,9 +56,6 @@ My sister and I play this game a lot and I thought building it would be a fun ch
 
 ## 🏗 Next steps 🚧
 * Pausing the game
-* Animations
+* Art credits overlay
 * Continuous music / playlist
-* Working out some kinks
 * Scoring
-* Better level complete message
-* Planet explodes when you lose.
