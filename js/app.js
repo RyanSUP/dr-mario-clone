@@ -284,10 +284,10 @@ function init() {
     boardModel = []
     initBoardModel()
     // set starting bad things
-    badThingsCount = (2 + level) * 4
-    badThingsCount = clampNum(badThingsCount, 12, 96)
+    // badThingsCount = (2 + level) * 4
+    badThingsCount = 40
+    badThingsCount = clampNum(badThingsCount, 12, 40)
     initBadThings()
-    countRemainingBadThings() // this is a bandaid around the issue where Bad thinds can spawn on eachother and alter the visible count
     badThingsMessage.style.visibility = 'visible'
     levelMessage.style.visibility = 'visible'
     spawnNextNodes()
@@ -330,10 +330,17 @@ function initBoardModel() {
 }
 
 function initBadThings() {
-    for (let i = 0; i < badThingsCount; i++) {
-        let v = getRandomBadThing(7)
-        boardModel[v.position.row][v.position.col] = v
-    }
+    let spawnedBadThings = 0;
+    do {
+        while(spawnedBadThings < badThingsCount) {
+            let v = getRandomBadThing(7)
+            boardModel[v.position.row][v.position.col] = v
+            spawnedBadThings++
+        }
+        // Remove viruses that spawn in a match and replace them in the next iteration.
+        removeMatchesFromBoard()
+        spawnedBadThings = countRemainingBadThings()
+    } while(spawnedBadThings !== badThingsCount)
 }
 
 /* ------------------------------- 🖥 Render 🎁 -------------------------------- */
@@ -423,7 +430,7 @@ async function runGameLoop() {
             render()
             await movePlayerPieceUntilItsBlocked()
             while(removeMatchesFromBoard() > 0 && gameState === 0) {
-                countRemainingBadThings()
+                badThingsCount = countRemainingBadThings()
                 if(badThingsCount === 0) {
                     gameState = 1
                     break;
@@ -591,7 +598,7 @@ function countRemainingBadThings() {
             }
         }
     }
-    badThingsCount = total
+    return total
 }
 
 function parseBorderArray(node){
