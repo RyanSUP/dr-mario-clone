@@ -43,7 +43,7 @@ let nextNodeSqDivs // to show player next pieces
 let sqDivs // The game board elements
 let boardModel // The board model
 let badThingsCount // get to 0 to win!
-let playerNodes // The nodes controlled by the player
+let playerNodes = null // The nodes controlled by the player
 let nextNodes
 let gameSpeed // how fast the nodes move down the board on their own
 let level = 0
