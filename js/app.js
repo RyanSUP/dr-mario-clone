@@ -426,7 +426,7 @@ async function runGameLoop() {
     while(gameState === 0) {
         if(isSpawnPositionBlocked()) {
             gameState = -1
-            level = 1
+            level = 0
         } else {
             spawnPlayerNodes()
             spawnNextNodes()
