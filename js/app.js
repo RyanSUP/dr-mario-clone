@@ -50,25 +50,24 @@ let level = 0
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
 let musicPlaying = false // for toggling music
 let music = new Audio('../audio/Race-to-Mars.mp3')
+let gamePaused = false
 /* ------------------------------- 🎮 Player Nodes 💊 -------------------------------- */
 class PlayerNodes {
 
     constructor() {
         // Nodes always start in the top center
-        let nodeA = this.createNode(SPAWN_POSITION_A)
-        let nodeB = this.createNode(SPAWN_POSITION_B)
+        let nodeA = this.createNode(SPAWN_POSITION_A, [1,0,1,1])
+        let nodeB = this.createNode(SPAWN_POSITION_B, [1,1,1,0])
         // Nodes always start connected to their sibling
         nodeA.sibling = nodeB
         nodeB.sibling = nodeA
-        nodeA.border = [1,0,1,1]
-        nodeB.border = [1,1,1,0]
         // The first element in this array will always be the hinge node.
         this.nodes = [nodeA, nodeB]
         // This is important for rotating.
         this.orientation = HORIZONTAL
     }
 
-    createNode(startPosition) {
+    createNode(startPosition, startBorder) {
         let randomIdx = Math.floor(Math.random() * NODE_COLORS.length)
         return {
             isBad: false,
@@ -77,7 +76,7 @@ class PlayerNodes {
             sibling: null,
             position: startPosition,
             // An array representing where the border should not show between the 2 nodes. [1,1,1,0] where 0 is no border.
-            border: [],
+            border: startBorder,
         }
     }
 
@@ -224,7 +223,9 @@ class PlayerNodes {
 document.addEventListener('keydown', handleKeyPress);
 
 function handleKeyPress(evt) {
-    if(playerNodes !== null) {
+    if(evt.code === 'Space') {
+        gamePaused = !gamePaused
+    } else if(playerNodes !== null && !gamePaused) {
         switch (evt.code) {
             case 'ArrowLeft':
                 playerNodes.move(LEFT)
@@ -240,10 +241,6 @@ function handleKeyPress(evt) {
                 break
             case 'KeyX':
                 playerNodes.rotate(CLOCKWISE)
-                break
-            case 'KeyR':
-                pauseState = !pauseState
-                console.log(pauseState)
                 break
         }
         render()
@@ -456,37 +453,39 @@ async function runGameLoop() {
 function moveAllFloatingNodesDownUntilBlocked() {
     return new Promise((resolve, reject) => {
         let interval = setInterval(()=> {
-            // (start on the second to last row)
-            let currentRowIndex = TOTAL_ROWS - 2 
-            let movedANode = false
-            while(currentRowIndex > -1) {
-                // Get all the nodes on the row
-                let row = boardModel[currentRowIndex]
-                let nodesInCurrentRow = []
-                row.forEach(square => {
-                    if(square !== '-') {
-                        nodesInCurrentRow.push(square)
-                    }
-                })
-                // Filter for floating nodes
-                let floatingNodes = getFloatingNodes(nodesInCurrentRow)
-                // Move all the floating nodes down 1 space
-                if(floatingNodes.length > 0) {
-                    movedANode = true
-                    floatingNodes.forEach(node => {
-                        removeNodeFromBoardModel(node)
-                        node.position = getAddedPositions(node.position, BOTTOM)
-                        addNodeToBoardModel(node)
+            if(!gamePaused) {
+                // (start on the second to last row)
+                let currentRowIndex = TOTAL_ROWS - 2 
+                let movedANode = false
+                while(currentRowIndex > -1) {
+                    // Get all the nodes on the row
+                    let row = boardModel[currentRowIndex]
+                    let nodesInCurrentRow = []
+                    row.forEach(square => {
+                        if(square !== '-') {
+                            nodesInCurrentRow.push(square)
+                        }
                     })
+                    // Filter for floating nodes
+                    let floatingNodes = getFloatingNodes(nodesInCurrentRow)
+                    // Move all the floating nodes down 1 space
+                    if(floatingNodes.length > 0) {
+                        movedANode = true
+                        floatingNodes.forEach(node => {
+                            removeNodeFromBoardModel(node)
+                            node.position = getAddedPositions(node.position, BOTTOM)
+                            addNodeToBoardModel(node)
+                        })
+                    }
+                    currentRowIndex--;
                 }
-                currentRowIndex--;
-            }
-            render()
-            if(movedANode) {
-                clearInterval(interval)
-                resolve(true)
-            } else {
-                resolve(false)
+                render()
+                if(movedANode) {
+                    clearInterval(interval)
+                    resolve(true)
+                } else {
+                    resolve(false)
+                }
             }
         }, gameSpeed)
     })
@@ -495,13 +494,15 @@ function moveAllFloatingNodesDownUntilBlocked() {
 function movePlayerPieceUntilItsBlocked() {
     return new Promise((resolve, reject) => {
         let playerMove = setInterval(() => {
-            let moveResult = playerNodes.move(BOTTOM)
-            render()
-            if(moveResult === false) {
-                clearInterval(playerMove)
-                // Setting playerNodes to null here prevents players from moving pieces while falling nodes resolve.
-                playerNodes.releasePlayerControl()
-                resolve()
+            if(!gamePaused) {
+                let moveResult = playerNodes.move(BOTTOM)
+                render()
+                if(moveResult === false) {
+                    clearInterval(playerMove)
+                    // Setting playerNodes to null here prevents players from moving pieces while falling nodes resolve.
+                    playerNodes.releasePlayerControl()
+                    resolve()
+                }
             }
         }, gameSpeed)
     })
@@ -709,7 +710,6 @@ function getIndexesOfRepeatingCharacters(arr) {
         for(let i = 0; i < matchLength; i++) {
             resultIndexes.push(result.index + i)
         }
-        console.log(result)
     }
     // Return the indexes. Ok to return empty []
     return resultIndexes
