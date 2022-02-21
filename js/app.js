@@ -75,13 +75,28 @@ const scoreCalculator = {
     },
     resetScore() {
         this.destroyedBadThingsThisTurn = 0
-        score.textContent = 'SCORE: 00000000'
+        score.textContent = 'SCORE: 0000000'
         this.totalScore = 0
     },
     renderScore() {
         let scoreString = this.totalScore.toString()
-        scoreString = scoreString.padStart(8,'0')
+        scoreString = scoreString.padStart(7,'0')
+        score.style.fontSize = `${this.getScoreElementSize()}rem`
         score.textContent =`SCORE: ${scoreString}`
+    },
+    getScoreElementSize() {
+        if(this.totalScore >= 1000000) {
+            return 8.2
+        } else if(this.totalScore >= 100000) {
+            return 7.8
+        } else if(this.totalScore >= 10000) {
+            return 7.2
+        } else if(this.totalScore >= 1000) {
+            return 6.8
+        }
+        else {
+            return 6.2
+        }
     },
 }
 
