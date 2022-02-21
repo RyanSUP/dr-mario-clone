@@ -8,6 +8,7 @@ const message = document.querySelector('.message')
 const badThingsMessage = document.querySelector('.bad-things-message')
 const levelMessage = document.querySelector('.level')
 const gameInfoPanel = document.querySelector('.info')
+const score = document.querySelector('.score')
 
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
 const TOTAL_ROWS = 16
@@ -42,36 +43,44 @@ const BAD_THINGS_COLORS = ['A', 'B', 'C']
 // For tracking score
 const scoreCalculator = {
     destroyedBadThingsThisTurn: 0,
+    totalScore: 0,
     calcScore() {
-        let scoredThisTurn = 0
+        let pointsAwarded = 0
         console.log(this.destroyedBadThingsThisTurn)
         switch (this.destroyedBadThingsThisTurn) {
+            case 0: 
+                pointsAwarded = 0
+                break
             case 1:
-                scoredThisTurn = 100
-                break;
+                pointsAwarded = 100
+                break
             case 2:
-                scoredThisTurn = 200
-                break;
+                pointsAwarded = 200
+                break
             case 3:
-                scoredThisTurn = 400
-                break;
+                pointsAwarded = 400
+                break
             case 4:
-                scoredThisTurn = 800
-                break;
+                pointsAwarded = 800
+                break
             case 5:
-                scoredThisTurn = 1600
-                break;
-            case 6:
-                scoredThisTurn = 3200
-                break;
+                pointsAwarded = 1600
+                break
+            default: // 6 or more
+                pointsAwarded = 3200
+                break
         }
-        return scoredThisTurn
+        this.totalScore += pointsAwarded
+        this.resetCalculator()
+        this.renderScore()
     },
     resetCalculator() {
         this.destroyedBadThingsThisTurn = 0
     },
     renderScore() {
-        console.log(this.calcScore())
+        let scoreString = this.totalScore.toString()
+        scoreString = scoreString.padStart(8,'0')
+        score.textContent =`SCORE: ${scoreString}`
     },
 }
 
@@ -504,7 +513,6 @@ async function runGameLoop() {
         if(isSpawnPositionBlocked()) {
             gameState = -1
             level = 0
-            score = 0
         } else {
             spawnPlayerNodes()
             spawnNextNodes()
@@ -522,7 +530,7 @@ async function runGameLoop() {
                     nodesAreFalling = await moveAllFloatingNodesDownUntilBlocked()
                 }
             }
-            scoreCalculator.renderScore()
+            scoreCalculator.calcScore()
         }
         render()
     }

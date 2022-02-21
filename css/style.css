@@ -44,17 +44,32 @@ body {
     color: white;
 }
 
-main {
-    position: relative;
+header {
+    display: flex;
+    width: 100%;
+    align-items: center;
 }
 
 h1 {
-    align-self: start;
     font-family: 'PixelFont';
     font-size: 10.2rem;
     color: var(--title-color);
     text-shadow: 0 5px var(--text-accent);
-    margin: 10px 0 0 20px;
+    margin: 10px 20px;
+}
+
+h2 {
+    text-align: right;
+    flex-grow: 2;
+    font-family: 'PixelFont';
+    font-size: 6.2rem;
+    color: white;
+    text-shadow: 0 5px var(--text-accent);
+    margin: 10px 20px;
+}
+
+main {
+    position: relative;
 }
 
 .planet {
