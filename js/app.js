@@ -39,6 +39,42 @@ const VERTICAL = 1
 const NODE_COLORS = ['a', 'b', 'c']
 const BAD_THINGS_COLORS = ['A', 'B', 'C']
 
+// For tracking score
+const scoreCalculator = {
+    destroyedBadThingsThisTurn: 0,
+    calcScore() {
+        let scoredThisTurn = 0
+        console.log(this.destroyedBadThingsThisTurn)
+        switch (this.destroyedBadThingsThisTurn) {
+            case 1:
+                scoredThisTurn = 100
+                break;
+            case 2:
+                scoredThisTurn = 200
+                break;
+            case 3:
+                scoredThisTurn = 400
+                break;
+            case 4:
+                scoredThisTurn = 800
+                break;
+            case 5:
+                scoredThisTurn = 1600
+                break;
+            case 6:
+                scoredThisTurn = 3200
+                break;
+        }
+        return scoredThisTurn
+    },
+    resetCalculator() {
+        this.destroyedBadThingsThisTurn = 0
+    },
+    renderScore() {
+        console.log(this.calcScore())
+    },
+}
+
 /* -------------------------------  Variables  -------------------------------- */
 let nextNodeSqDivs // to show player next pieces
 let sqDivs // The game board elements
@@ -468,6 +504,7 @@ async function runGameLoop() {
         if(isSpawnPositionBlocked()) {
             gameState = -1
             level = 0
+            score = 0
         } else {
             spawnPlayerNodes()
             spawnNextNodes()
@@ -485,6 +522,7 @@ async function runGameLoop() {
                     nodesAreFalling = await moveAllFloatingNodesDownUntilBlocked()
                 }
             }
+            scoreCalculator.renderScore()
         }
         render()
     }
@@ -561,10 +599,15 @@ function removeMatchesFromBoard() {
         let uniqueMatches = new Set()
         allMatchingPositions.forEach(position => uniqueMatches.add(getNodeAtPosition(position)))
         uniqueMatches.forEach(node => {
+            // Remove siblings so they fall independantly
             if(node.sibling !== null) {
                 decoupleSiblings(node)
             }
             removeNodeFromBoardModel(node)
+            // Add to total score if it was a virus
+            if(node.isBad) {
+                scoreCalculator.destroyedBadThingsThisTurn++
+            }
         })
         // Matches found 
         return 1
@@ -769,9 +812,4 @@ function getRotatedBoardModel() {
         mappedArr.push(colArray)
     }
     return mappedArr
-}
-
-function calcScore(str) {
-    const searchRegExp = RegExp('A|B|C', 'gi')
-
 }
