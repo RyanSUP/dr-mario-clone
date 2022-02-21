@@ -6,21 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dr Mario 2323</title>
     <link rel="icon" href="./images/favicon.png">
-    <script defer src="js/app.js"></script>
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <link rel="stylesheet" href="css/style.css">
+    <script defer src="js/app.js"></script>
 </head>
 <body>
     <header>
         <h1>DR. MARIO 2323</h1>
-        <h2 class ="score">Score: 0000000</h2>
+        <section class="info-panel animate__animated">
+            <h2 class="level-info">LEVEL 1  - Viruses 10</h2>
+            <h2 class ="score">Score: 0000000</h2>
+        </section>
     </header>
     <img class ="planet" src="./images/planet.gif" alt="">
     <main>
-        <section class="info">
-            <p class="level"></p>
-            <p class="bad-things-message"></p>
-        </section>
-        <section class="board-overlay">
+        <section class="board-overlay animate__animated">
             <p class="message"></p>
             <p class="start-btn">START</p>
             <p class="music-btn">Toggle Music</p>

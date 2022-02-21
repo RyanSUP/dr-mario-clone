@@ -53,6 +53,7 @@ My sister and I play this game a lot and I thought building it would be a fun ch
   * CSS
   * JavaScript
   * Git
+  * [Animate.style](https://animate.style/)
 
 ## 🏗 Next steps 🚧
 * Pausing the game

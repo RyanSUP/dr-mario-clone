@@ -5,9 +5,8 @@ const boardOverlay = document.querySelector('.board-overlay')
 const startButton = document.querySelector('.start-btn')
 const musicButton = document.querySelector('.music-btn')
 const message = document.querySelector('.message')
-const badThingsMessage = document.querySelector('.bad-things-message')
-const levelMessage = document.querySelector('.level')
-const gameInfoPanel = document.querySelector('.info')
+const levelInfo = document.querySelector('.level-info')
+const gameInfoPanel = document.querySelector('.info-panel')
 const score = document.querySelector('.score')
 
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
@@ -315,12 +314,13 @@ function handleKeyPress(evt) {
 }
 
 startButton.addEventListener('click', evt => {
-    hideBoardOverlay()
-    gameInfoPanel.visibility = 'visible'
+    gameInfoPanel.classList.add('animate__bounceInDown')
+    gameInfoPanel.style.visibility = 'visible'
     if(gameState === -1) {
         level = 0
         scoreCalculator.resetScore()
     }
+    hideBoardOverlay()
     init()
     runGameLoop()
 })
@@ -434,13 +434,12 @@ function render() {
     } else if(gameState === 0) {
         renderBoard()
         renderNextNodes()
-        renderGameInfo()
     } else if(gameState === 1){
         renderNextLevelOverlay()
     } else if(gameState === -1) {
         renderGameOverOverlay()
     }
-    scoreCalculator.renderScore()
+    renderGameInfo()
 }
 
 // Reset all the div.sq classes default, then add classes depending on what is at the position.
@@ -476,8 +475,8 @@ function renderNextNodes() {
 }
 
 function renderGameInfo() {
-    badThingsMessage.textContent = `${badThingsCount} viruses`
-    levelMessage.textContent = `Level ${level}`
+    scoreCalculator.renderScore()
+    levelInfo.textContent = `Level ${level} - Viruses ${badThingsCount}`
 }
 
 function hideBoardOverlay() {
@@ -502,7 +501,6 @@ function renderPauseOverlay() {
 
 function renderGameOverOverlay() {
     boardOverlay.style.visibility = 'visible'
-    gameInfoPanel.style.visibility = 'hidden'
     message.innerHTML = 'Game over'
     startButton.style.visibility = 'visible'
     musicButton.style.visibility = 'visible'
@@ -510,7 +508,6 @@ function renderGameOverOverlay() {
 
 function renderNextLevelOverlay() {
     boardOverlay.style.visibility = 'visible'
-    gameInfoPanel.style.visibility = 'hidden'
     message.innerHTML = `Level ${level + 1}`
     startButton.style.visibility = 'visible'
     musicButton.style.visibility = 'visible'
