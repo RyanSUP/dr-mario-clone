@@ -7,6 +7,7 @@ const musicButton = document.querySelector('.music-btn')
 const message = document.querySelector('.message')
 const badThingsMessage = document.querySelector('.bad-things-message')
 const levelMessage = document.querySelector('.level')
+const gameInfoPanel = document.querySelector('.info')
 
 /* -------------------------------  CONSTANTS  ----------------------------------------- */
 const TOTAL_ROWS = 16
@@ -223,8 +224,13 @@ class PlayerNodes {
 document.addEventListener('keydown', handleKeyPress);
 
 function handleKeyPress(evt) {
-    if(evt.code === 'Space') {
+    if(evt.code === 'Space' && startButton.style.visibility === 'hidden') { //  hacky way around not letting the player pause while in a menu
         gamePaused = !gamePaused
+        if(gamePaused) {
+            renderPauseOverlay()
+        } else {
+            hideBoardOverlay()
+        }
     } else if(playerNodes !== null && !gamePaused) {
         switch (evt.code) {
             case 'ArrowLeft':
@@ -298,8 +304,10 @@ function init() {
     boardModel = []
     initBoardModel()
     // set starting bad things
-    badThingsCount = (2 + level) * 4
-    badThingsCount = clampNum(badThingsCount, 12, 40)
+    // badThingsCount = (2 + level) * 4
+    badThingsCount = 1
+
+    // badThingsCount = clampNum(badThingsCount, 12, 40)
     initBadThings()
     badThingsMessage.style.visibility = 'visible'
     levelMessage.style.visibility = 'visible'
@@ -359,12 +367,15 @@ function initBadThings() {
 /* ------------------------------- 🖥 Render 🎁 -------------------------------- */
 // TODO: Render Score
 function render() {
-    if(gameState === 0) {
+    if(gamePaused) {
+        renderPauseOverlay()
+    } else if(gameState === 0) {
         renderBoard()
         renderNextNodes()
         renderGameInfo()
-    } else {
-        message.textContent = (gameState === 1) ? 'Next Level!' : 'Game Over'
+    } else if(gameState === 1){
+        renderNextLevelOverlay()
+    } else if(gameState === -1) {
         renderGameOverOverlay()
     }
     // render score
@@ -402,47 +413,45 @@ function renderNextNodes() {
     
 }
 
-function renderGameOverOverlay() {
-    badThingsMessage.style.visibility = 'hidden'
-    levelMessage.style.visibility = 'hidden'
-    startButton.style.visibility = 'visible'
-    boardOverlay.style.visibility = 'visible'
-}
-
 function renderGameInfo() {
     badThingsMessage.textContent = `${badThingsCount} viruses`
     levelMessage.textContent = `Level ${level}`
 }
 
 function hideBoardOverlay() {
+    boardOverlay.style.visibility = 'hidden'
     message.textContent = ''
     startButton.style.visibility = 'hidden'
-    boardOverlay.style.visibility = 'hidden'
+    musicButton.style.visibility = 'hidden'
 }
 
 function renderStartOverlay() {
     boardOverlay.style.visibility = 'visible'
-    startButton.style.visibility = 'visible'
+    message.textContent = ''
     startButton.style.visibility = 'visible'
     musicButton.style.visibility = 'visible'
-    // start button
-    // toggle music
 }
 
 function renderPauseOverlay() {
-    // Pause message
-    // toggle music
+    boardOverlay.style.visibility = 'visible'
+    message.innerHTML = '<p>Press <strong>SPACE</strong> to resume</p>'
+    musicButton.style.visibility = 'visible'
+}
+
+function renderGameOverOverlay() {
+    boardOverlay.style.visibility = 'visible'
+    gameInfoPanel.style.visibility = 'hidden'
+    message.innerHTML = 'Game over'
+    startButton.style.visibility = 'visible'
+    musicButton.style.visibility = 'visible'
 }
 
 function renderNextLevelOverlay() {
-    // Next level message
-    // toggle music
-}
-
-function renderGameOverOverlay2() {
-    // game ove message
-    // final score
-    // New game button
+    boardOverlay.style.visibility = 'visible'
+    gameInfoPanel.style.visibility = 'hidden'
+    message.innerHTML = `<p>Level ${level + 1}</p>`
+    startButton.style.visibility = 'visible'
+    musicButton.style.visibility = 'visible'
 }
 
 /* ------------------------------- 🥩 Meat N Taters 🥔 -------------------------------- */
@@ -483,7 +492,6 @@ async function runGameLoop() {
     }
     // Game is over
     playerNodes = null
-    renderGameOverOverlay()
 }
 
 // This function runs from the entire boardModel ONE TIME and updates the floating nodes in each row.
