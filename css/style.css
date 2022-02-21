@@ -90,6 +90,14 @@ main {
     justify-content: space-around;
 }
 
+.controls p {
+    margin-bottom: 0;
+}
+
+.space {
+    margin-top: 10px;
+}
+
 /* -------------------- GAMEBOARD ------------------------ */
 section.board-container {
     background-color: var(--body-bg);
