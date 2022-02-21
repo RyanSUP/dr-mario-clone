@@ -84,7 +84,7 @@ section.next {
     font-size: 6rem;
     padding: 4px;
     cursor: pointer;
-    flex-grow: 2;
+    /* flex-grow: 2; */
     /* z index makes the mouseover start-btn bug cooler */
     z-index: 3;
 }
@@ -94,12 +94,12 @@ section.next {
     text-align: center;
     color: white;
     font-size: 4rem;
-    margin: 0px;
+    margin: 0px 0px 15px;
     cursor: pointer;
 }
 
 .start-btn:hover, .music-btn:hover {
-    text-shadow: 0 3px var(--text-accent);
+    text-shadow: 0 4px var(--text-accent);
     color: var(--title-color)
 }
 
