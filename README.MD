@@ -14,8 +14,9 @@ Dr. Mario needs your help destroying the latest viral threat to the Mushroom Gal
 
 Controls:
 * ← ↓ → move
-* z ⤿ rotate counter clockwise
-* ⤾ x rotate clockwise
+* Z ⤿ rotate counter clockwise
+* ⤾ X rotate clockwise
+* SPACE pause game
 
 Eliminate all of the viruses to win!
 
