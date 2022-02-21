@@ -254,7 +254,9 @@ startButton.addEventListener('click', evt => {
 })
 
 startButton.addEventListener('mouseover', evt => {
-    evt.target.innerHTML = "<span>></span> START <span><</span>"
+    if(evt.target.className === 'start-btn') {
+        evt.target.innerHTML = "> START <"
+    }
 })
 
 startButton.addEventListener('mouseleave', evt => {
@@ -263,12 +265,22 @@ startButton.addEventListener('mouseleave', evt => {
 
 musicButton.addEventListener('click', playAudio)
 
+// PLays next song when first is done.
 music.addEventListener('ended', ()=> {
     console.log('audio event')
     music = new Audio('../audio/Automatav2.mp3')
     music.volume = .20
     music.play()
 })
+
+musicButton.addEventListener('mouseover', evt => {
+    if(evt.target.className === 'music-btn') {
+        evt.target.innerHTML = "> TOGGLE MUSIC <"
+    }
+})
+musicButton.addEventListener('mouseleave', evt => {
+    evt.target.innerHTML = "TOGGLE MUSIC"
+}) 
 /* ------------------------------- 🔌 Initializing 👍 -------------------------------- */
 function init() {
     gameState = 0
@@ -406,6 +418,31 @@ function hideBoardOverlay() {
     message.textContent = ''
     startButton.style.visibility = 'hidden'
     boardOverlay.style.visibility = 'hidden'
+}
+
+function renderStartOverlay() {
+    boardOverlay.style.visibility = 'visible'
+    startButton.style.visibility = 'visible'
+    startButton.style.visibility = 'visible'
+    musicButton.style.visibility = 'visible'
+    // start button
+    // toggle music
+}
+
+function renderPauseOverlay() {
+    // Pause message
+    // toggle music
+}
+
+function renderNextLevelOverlay() {
+    // Next level message
+    // toggle music
+}
+
+function renderGameOverOverlay2() {
+    // game ove message
+    // final score
+    // New game button
 }
 
 /* ------------------------------- 🥩 Meat N Taters 🥔 -------------------------------- */
