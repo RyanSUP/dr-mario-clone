@@ -108,6 +108,7 @@ let playerNodes = null // The nodes controlled by the player
 let nextNodes
 let gameSpeed // how fast the nodes move down the board on their own
 let level = 0
+let nodesPlayed // How many nodes were played in the level. used to calculate speed increase
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
 let musicPlaying = false // for toggling music
 let music = new Audio('../audio/Race-to-Mars.mp3')
@@ -316,6 +317,10 @@ function handleKeyPress(evt) {
 startButton.addEventListener('click', evt => {
     hideBoardOverlay()
     gameInfoPanel.visibility = 'visible'
+    if(gameState === -1) {
+        level = 0
+        scoreCalculator.resetScore()
+    }
     init()
     runGameLoop()
 })
@@ -526,8 +531,6 @@ async function runGameLoop() {
     while(gameState === 0) {
         if(isSpawnPositionBlocked()) {
             gameState = -1
-            level = 0
-            scoreCalculator.resetScore()
         } else {
             spawnPlayerNodes()
             spawnNextNodes()
