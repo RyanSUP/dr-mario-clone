@@ -357,6 +357,7 @@ function init() {
     gameState = 0
     level++
     gameSpeed = 400
+    nodesPlayed = 0
     // Create the HTML (View) board 
     nextNodeContainer.innerHTML = ''
     nextNodeSqDivs = []
@@ -427,7 +428,6 @@ function initBadThings() {
 }
 
 /* ------------------------------- 🖥 Render 🎁 -------------------------------- */
-// TODO: Render Score
 function render() {
     if(gamePaused) {
         renderPauseOverlay()
@@ -520,6 +520,7 @@ function renderNextLevelOverlay() {
 function spawnPlayerNodes() {
     playerNodes = nextNodes
     playerNodes.placePlayerNodesOnBoardModel()
+    nodesPlayed++;
 }
 
 function spawnNextNodes() {
@@ -643,8 +644,11 @@ function removeMatchesFromBoard() {
 }
 
 function increaseSpeed() {
-    gameSpeed -= 5
-    gameSpeed = clampNum(gameSpeed,250, 400)
+    if(nodesPlayed % 10 === 0) {
+        gameSpeed -= 30
+        gameSpeed = clampNum(gameSpeed,250, 400)
+    }
+    console.log(gameSpeed)
 }
 
 /* ------------------------------- 🦠 Node Helpers 💊 -------------------------------- */
