@@ -46,7 +46,6 @@ const scoreCalculator = {
     totalScore: 0,
     calcScore() {
         let pointsAwarded = 0
-        console.log(this.destroyedBadThingsThisTurn)
         switch (this.destroyedBadThingsThisTurn) {
             case 0: 
                 pointsAwarded = 0
@@ -335,7 +334,6 @@ musicButton.addEventListener('click', playAudio)
 
 // PLays next song when first is done.
 music.addEventListener('ended', ()=> {
-    console.log('audio event')
     music = new Audio('../audio/Automatav2.mp3')
     music.volume = .20
     music.play()
