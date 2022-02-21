@@ -304,10 +304,8 @@ function init() {
     boardModel = []
     initBoardModel()
     // set starting bad things
-    // badThingsCount = (2 + level) * 4
-    badThingsCount = 1
-
-    // badThingsCount = clampNum(badThingsCount, 12, 40)
+    badThingsCount = (2 + level) * 4
+    badThingsCount = clampNum(badThingsCount, 12, 40)
     initBadThings()
     badThingsMessage.style.visibility = 'visible'
     levelMessage.style.visibility = 'visible'
