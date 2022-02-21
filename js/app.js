@@ -71,11 +71,12 @@ const scoreCalculator = {
                 break
         }
         this.totalScore += pointsAwarded
-        this.resetCalculator()
-        this.renderScore()
-    },
-    resetCalculator() {
         this.destroyedBadThingsThisTurn = 0
+    },
+    resetScore() {
+        this.destroyedBadThingsThisTurn = 0
+        score.textContent = 'SCORE: 00000000'
+        this.totalScore = 0
     },
     renderScore() {
         let scoreString = this.totalScore.toString()
@@ -300,6 +301,7 @@ function handleKeyPress(evt) {
 
 startButton.addEventListener('click', evt => {
     hideBoardOverlay()
+    gameInfoPanel.visibility = 'visible'
     init()
     runGameLoop()
 })
@@ -352,8 +354,7 @@ function init() {
     badThingsCount = (2 + level) * 4
     badThingsCount = clampNum(badThingsCount, 12, 40)
     initBadThings()
-    badThingsMessage.style.visibility = 'visible'
-    levelMessage.style.visibility = 'visible'
+
     spawnNextNodes()
     render()
 }
@@ -421,7 +422,7 @@ function render() {
     } else if(gameState === -1) {
         renderGameOverOverlay()
     }
-    // render score
+    scoreCalculator.renderScore()
 }
 
 // Reset all the div.sq classes default, then add classes depending on what is at the position.
@@ -513,6 +514,7 @@ async function runGameLoop() {
         if(isSpawnPositionBlocked()) {
             gameState = -1
             level = 0
+            scoreCalculator.resetScore()
         } else {
             spawnPlayerNodes()
             spawnNextNodes()
