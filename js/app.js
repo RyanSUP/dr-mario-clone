@@ -432,7 +432,7 @@ function renderStartOverlay() {
 
 function renderPauseOverlay() {
     boardOverlay.style.visibility = 'visible'
-    message.innerHTML = '<p>Press <strong>SPACE</strong> to resume</p>'
+    message.innerHTML = 'Game paused'
     musicButton.style.visibility = 'visible'
 }
 
@@ -447,7 +447,7 @@ function renderGameOverOverlay() {
 function renderNextLevelOverlay() {
     boardOverlay.style.visibility = 'visible'
     gameInfoPanel.style.visibility = 'hidden'
-    message.innerHTML = `<p>Level ${level + 1}</p>`
+    message.innerHTML = `Level ${level + 1}`
     startButton.style.visibility = 'visible'
     musicButton.style.visibility = 'visible'
 }

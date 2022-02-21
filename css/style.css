@@ -165,8 +165,9 @@ section.next {
 }
 /* -------------------- OVERLAY ------------------------ */
 section.board-overlay {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    align-items: center;
+
     position: absolute;
     background-color: var(--body-bg);
     opacity: 100%;
@@ -175,14 +176,13 @@ section.board-overlay {
     padding: 2px;
     border: 8px double var(--title-color);
     z-index: 2;
-    justify-content: space-around;
 }
 
 .message {
     font-family: 'PixelFont';
     text-align: center;
     color: white;
-    font-size: 4rem;
+    font-size: 8rem;
     margin: 0;
 }
 .start-btn{
@@ -193,13 +193,7 @@ section.board-overlay {
     padding: 4px;
     cursor: pointer;
     z-index: 3;
-    display: flex;
-    justify-content: center;
-}
-
-.start-btn:hover, .music-btn:hover {
-    text-shadow: 0 3px var(--text-accent);
-    color: var(--title-color)
+    margin: 0;
 }
 
 .music-btn{
@@ -209,6 +203,12 @@ section.board-overlay {
     font-size: 4rem;
     margin: 0 0 15px;
     cursor: pointer;
+    align-self: end;
+}
+
+.start-btn:hover, .music-btn:hover {
+    text-shadow: 0 3px var(--text-accent);
+    color: var(--title-color)
 }
 
 /* -------------------- MEDIA QUERIES ------------------------ */
