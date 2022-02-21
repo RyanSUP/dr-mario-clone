@@ -654,9 +654,6 @@ function countRemainingBadThings() {
 }
 
 function parseBorderArray(node){
-    if(node.sibling === null) {
-        return 'omit-none'
-    }
     let zeroAt = node.border.findIndex(element => element === 0)
     switch (zeroAt) {
         case 0:
@@ -672,7 +669,9 @@ function parseBorderArray(node){
 
 function addNodeClassesToBoard(htmlEle, node) {
     htmlEle.classList.add(node.color)
-    htmlEle.classList.add(parseBorderArray(node))
+    if(node.sibling !== null) {
+        htmlEle.classList.add(parseBorderArray(node))
+    }
 }
 
 /* ------------------------------- 👷‍♂️ Misc Helpers 🏗 -------------------------------- */

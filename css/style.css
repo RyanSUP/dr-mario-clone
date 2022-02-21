@@ -148,10 +148,6 @@ section.next {
 
 }
 
-.omit-none {
-    border: 3px solid var(--piece-border);
-}
-
 .omit-bottom {
     border-bottom: none;
 }
