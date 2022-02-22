@@ -90,7 +90,7 @@ const audioPlayer = {
         {track: 'Automata', path: '../audio/Automata.mp3' },
         {track: 'Initiate Destruction', path: '../audio/Initiate_Destruction.mp3' },
         {track: 'City Stomper', path: '../audio/City_Stomper.mp3' },
-        {track: "Captain's Log", path: '../audio/Captains_Log.mp3' },
+        {track: "Captain's Log", path: '../audio/Captains_Log.wav' },
         {track: 'Crash Landing', path: '../audio/Crash_Landing.mp3' },
         {track: 'Main Objective', path: '../audio/Main_Objective.mp3' },
     ],
