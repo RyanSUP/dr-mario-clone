@@ -3,6 +3,11 @@
     src: url("../css/PixelMiddle.ttf") format("truetype");
   }
 
+@font-face {
+    font-family: "PixelFontSmall";
+    src: url("../css/PixelSmall_v2.ttf") format("truetype");
+}
+
 html {
     box-sizing: border-box;
     background-color: var(--body-bg);
@@ -85,6 +90,7 @@ main {
 }
 
 .controls {
+    text-align: center;
     font-size: 2.5rem;
     display: flex;
     justify-content: space-around;
@@ -92,12 +98,17 @@ main {
 
 .controls p {
     margin-bottom: 0;
+    font-family: 'PixelFontSmall';
 }
 
 .space {
     margin-top: 10px;
+    font-size: 5rem;
 }
 
+span {
+    font-size: 5rem;
+}
 /* -------------------- GAMEBOARD ------------------------ */
 section.board-container {
     background-color: var(--body-bg);
