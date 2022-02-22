@@ -111,6 +111,9 @@ const audioPlayer = {
         this.currentSong.play()
         this.currentSong.addEventListener('ended', ()=> {
             this.currentSongIdx++
+            if(this.currentSongIdx === this.library.length) {
+                this.currentSongIdx = 0
+            }
             this.initAudioPlayer()
         })
     }
