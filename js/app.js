@@ -83,6 +83,39 @@ const scoreCalculator = {
     },
 }
 
+const audioPlayer = {
+    playingAudio: false,
+    library: [
+        {track: 'Race to Mars', path: '../audio/Race_to_Mars.mp3' },
+        {track: 'Automata', path: '../audio/Automata.mp3' },
+        {track: 'Initiate Destruction', path: '../audio/Initiate_Destruction.mp3' },
+        {track: 'City Stomper', path: '../audio/City_Stomper.mp3' },
+        {track: "Captain's Log", path: '../audio/Captains_Log.mp3' },
+        {track: 'Crash Landing', path: '../audio/Crash_Landing.mp3' },
+        {track: 'Main Objective', path: '../audio/Main_Objective.mp3' },
+    ],
+    currentSongIdx: 0,
+    currentSong: null,
+    toggleAudio() {
+        this.currentSong.volume = .20
+        if(this.playingAudio) {
+            this.currentSong.pause()
+        } else {
+            this.currentSong.play()
+        }
+        this.playingAudio = !this.playingAudio
+    },
+    initAudioPlayer() {
+        this.currentSong = new Audio(this.library[this.currentSongIdx].path)
+        this.currentSong.volume = .20
+        this.currentSong.play()
+        this.currentSong.addEventListener('ended', ()=> {
+            this.currentSongIdx++
+            this.initAudioPlayer()
+        })
+    }
+}
+
 /* -------------------------------  Variables  -------------------------------- */
 let nextNodeSqDivs // to show player next pieces
 let sqDivs // The game board elements
@@ -94,8 +127,6 @@ let gameSpeed // how fast the nodes move down the board on their own
 let level = 0
 let nodesPlayed // How many nodes were played in the level. used to calculate speed increase
 let gameState = 0 // 0 = playing, 1 = won (duh) -1 = lose
-let musicPlaying = false // for toggling music
-let music = new Audio('../audio/Race-to-Mars.mp3')
 let gamePaused = false
 /* ------------------------------- 🎮 Player Nodes 💊 -------------------------------- */
 class PlayerNodes {
@@ -320,13 +351,12 @@ startButton.addEventListener('mouseleave', evt => {
     evt.target.innerHTML = "START"
 }) 
 
-musicButton.addEventListener('click', playAudio)
-
-// PLays next song when first is done.
-music.addEventListener('ended', ()=> {
-    music = new Audio('../audio/Automatav2.mp3')
-    music.volume = .20
-    music.play()
+musicButton.addEventListener('click', ()=> {
+    if(audioPlayer.currentSong === null) {
+        audioPlayer.initAudioPlayer()
+    } else {
+        audioPlayer.toggleAudio()
+    }
 })
 
 musicButton.addEventListener('mouseover', evt => {
@@ -741,16 +771,6 @@ function getAddedPositions(posObjA, posObjB) {
         row: posObjA.row + posObjB.row,
         col: posObjA.col + posObjB.col
     }
-}
-
-function playAudio() {
-    music.volume = .20;
-    if(musicPlaying) {
-        music.pause()
-    } else {
-        music.play()
-    }
-    musicPlaying = !musicPlaying
 }
 
 function getNodeAtPosition(positionObj) { return boardModel[positionObj.row][positionObj.col] }

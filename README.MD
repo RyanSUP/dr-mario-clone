@@ -41,7 +41,7 @@ HUGE thanks to these artists, their amazing work makes Dr. Mario 2323 exciting t
 * [Pixel Planet Generator](https://deep-fold.itch.io/pixel-planet-generator)
 
 ### 🎶 [Dos-88](https://www.youtube.com/user/AntiMulletpunk)
-* [Synthwave Music](https://dos88.itch.io/dos-88-music-library)
+* [Synthwave Music](https://dos88.itch.io/)
 
 
 ## 💡 Project Inspiration 
@@ -57,7 +57,7 @@ My sister and I play this game a lot and I thought building it would be a fun ch
   * [Animate.style](https://animate.style/)
 
 ## 🏗 Next steps 🚧
-* Pausing the game
-* Art credits overlay
+* ~~Pausing the game~~
+* Art credits
 * Continuous music / playlist
-* Scoring
+* ~~Scoring~~

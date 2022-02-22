@@ -201,6 +201,7 @@ section.board-overlay {
     color: white;
     font-size: 8rem;
     margin: 0;
+    text-shadow: 0 4px var(--text-accent);
 }
 .start-btn{
     font-family: 'PixelFont';
