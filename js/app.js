@@ -607,6 +607,7 @@ function moveAllFloatingNodesDownUntilBlocked() {
                     clearInterval(interval)
                     resolve(true)
                 } else {
+                    clearInterval(interval)
                     resolve(false)
                 }
             }
