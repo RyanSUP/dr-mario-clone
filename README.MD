@@ -1,4 +1,6 @@
-![Title](https://i.imgur.com/SOni764.png)
+![Title](https://i.imgur.com/YSwjo8i.png)
+
+![GameDemo](https://i.imgur.com/mI56BwI.png)
 
 The year is 2323 and Nintendo's Mario franchise  
 just  
@@ -12,23 +14,25 @@ Dr. Mario needs your help destroying the latest viral threat to the Mushroom Gal
 
 ## 🎮 🤔 How to play
 
-Controls:
+### Controls:
 * ← ↓ → move
 * Z ⤿ rotate counter clockwise
 * ⤾ X rotate clockwise
 * SPACE pause game
 
-Eliminate all of the viruses to win!
+### Eliminate all of the viruses to win!
 
-![Viruses](https://i.imgur.com/EB3UGJD.png)
+![Viruses](https://i.imgur.com/77gIBhc.png)
 
 Connect 4 or more of the same color to remove blocks and viruses from the board.
 
-![Connect4](https://i.imgur.com/nMJ7cOg.png)
+![Connect4](https://i.imgur.com/I8BK5Yz.png)
 
 Any floating blocks will fall down. But be careful, those viruses won't budge!
 
-![DropDemo](https://i.imgur.com/ZTLoBqd.png)
+
+![DropDemo2](https://i.imgur.com/BI61uJA.png)
+
 
 ## 🎥 Credits 🎨 
 HUGE thanks to these artists, their amazing work makes Dr. Mario 2323 exciting to play:
@@ -50,14 +54,17 @@ My sister and I play this game a lot and I thought building it would be a fun ch
 
 
 ## 👨🏻‍🔬 Technologies used 👨‍💻
+This project showcases DOM manipulation, canvas was not used and all game pieces are rendered with CSS.
   * HTML
   * CSS
   * JavaScript
   * Git
   * [Animate.style](https://animate.style/)
 
+
 ## 🏗 Next steps 🚧
 * ~~Pausing the game~~
-* Art credits
-* Continuous music / playlist
+* Art credits in game
+* ~~Continuous music / playlist~~
 * ~~Scoring~~
+
