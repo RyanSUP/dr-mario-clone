@@ -402,7 +402,7 @@ function initBadThings() {
     let spawnedBadThings = 0;
     do {
         while(spawnedBadThings < badThingsCount) {
-            let v = getRandomBadThing(7)
+            let v = getRandomBadThing()
             boardModel[v.position.row][v.position.col] = v
             spawnedBadThings++
         }
@@ -630,7 +630,6 @@ function increaseSpeed() {
         gameSpeed -= 30
         gameSpeed = clampNum(gameSpeed,250, 400)
     }
-    console.log(gameSpeed)
 }
 
 /* ------------------------------- 🦠 Node Helpers 💊 -------------------------------- */
@@ -643,7 +642,8 @@ function decoupleSiblings(node) {
 
 // Setting the handicap ensures bad things will never be generated above the handicap row.
 // This can be adjusted to increase difficulty
-function getRandomBadThing(handicap) {
+function getRandomBadThing() {
+    let handicap = getHandicapLevel()
     let randomIdx = Math.floor(Math.random() * BAD_THINGS_COLORS.length)
     let randomRow = Math.floor(Math.random() * TOTAL_ROWS + handicap)
     randomRow = clampNum(randomRow, handicap, 15)
@@ -824,4 +824,21 @@ function getRotatedBoardModel() {
         mappedArr.push(colArray)
     }
     return mappedArr
+}
+
+function getHandicapLevel() {
+    switch (level) {
+        case 1:
+            return 7 
+        case 2: 
+            return 7 
+        case 3: 
+            return 6 
+        case 4: 
+            return 6
+        case 5:
+            return 5
+        default:
+            return 4
+    }
 }
