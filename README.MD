@@ -51,7 +51,7 @@ HUGE thanks to these artists, their amazing work makes Dr. Mario 2323 exciting t
 ## 💡 Project Inspiration 
 My sister and I play this game a lot and I thought building it would be a fun challenge! And oh, a challenge it was...
 
-
+![OGdrmario](https://upload.wikimedia.org/wikipedia/en/c/ce/Dr_mario_screenshot.gif)
 
 ## 👨🏻‍🔬 Technologies used 👨‍💻
 This project showcases DOM manipulation, canvas was not used and all game pieces are rendered with CSS.
